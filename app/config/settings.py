@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # ==========================================================
     # SQLite Database
     # ==========================================================
-    SQLITE_DB_PATH: str = "./data/finsight.db"
+    DATABASE_URL: str = "sqlite:///./data/finsight.db"
 
 
 settings = Settings()
