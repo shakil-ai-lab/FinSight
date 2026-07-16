@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.domain.documents import DocumentType
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -13,14 +14,6 @@ class AnalysisType(Enum):
     QUARTERLY = "quarterly"
     TRANSCRIPT = "transcript"
     COMPREHENSIVE = "comprehensive"
-
-
-class DocumentType(Enum):
-    """Supported financial document types."""
-
-    TEN_K = "10-K"
-    TEN_Q = "10-Q"
-    EARNINGS_TRANSCRIPT = "earnings_transcript"
 
 
 @dataclass(slots=True)
