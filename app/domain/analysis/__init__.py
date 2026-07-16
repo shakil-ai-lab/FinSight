@@ -4,8 +4,17 @@ from .request import (
     DocumentType,
 )
 
+from .plan import (
+    AnalysisPlan,
+    CapabilityType,
+    PlanStatus,
+)
+
 __all__ = [
     "AnalysisRequest",
     "AnalysisType",
     "DocumentType",
+    "AnalysisPlan",
+    "CapabilityType",
+    "PlanStatus",
 ]
