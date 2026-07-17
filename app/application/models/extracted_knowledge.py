@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.knowledge.business_segments import BusinessSegments
-from domain.knowledge.financial_snapshot import FinancialSnapshot
-from domain.knowledge.guidance_summary import GuidanceSummary
-from domain.knowledge.risk_assessment import RiskAssessment
-from domain.knowledge.transcript_analysis import TranscriptAnalysis
-
+from domain.knowledge import (
+    BusinessSegment,
+    FinancialSnapshot,
+    GuidanceSummary,
+    RiskAssessment,
+    TranscriptAnalysis,
+)
 
 @dataclass(frozen=True, slots=True)
 class ExtractedKnowledge:
@@ -21,7 +22,7 @@ class ExtractedKnowledge:
     """
 
     financial_snapshot: FinancialSnapshot
-    business_segments: BusinessSegments
+    business_segments: BusinessSegment
     risk_assessment: RiskAssessment
     guidance_summary: GuidanceSummary
     transcript_analysis: TranscriptAnalysis

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.analysis.communication_analysis import CommunicationAnalysis
-from domain.analysis.consistency_analysis import ConsistencyAnalysis
-from domain.analysis.quarter_comparison import QuarterComparison
-from domain.analysis.trend_analysis import TrendAnalysis
+from domain. insights import(
+    CommunicationAnalysis,
+    ConsistencyAnalysis,
+    QuarterComparison,
+    TrendAnalysis,
+)
 
 
 @dataclass(frozen=True, slots=True)

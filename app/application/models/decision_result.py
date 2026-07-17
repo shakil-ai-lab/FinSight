@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.decision.materiality_assessment import MaterialityAssessment
+from domain.decision_support.materiality_assessment import MaterialityAssessment
 
 
 @dataclass(frozen=True, slots=True)
