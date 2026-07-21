@@ -1,49 +1,28 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import requests
 
+from app.config.settings import settings
 
-@dataclass(slots=True, frozen=True)
+
 class SECClient:
     """
     Thin HTTP client for communicating with the SEC EDGAR system.
-
-    This class is responsible only for downloading raw filing
-    content from SEC endpoints. It contains no business logic and
-    has no knowledge of domain objects.
     """
 
-    user_agent: str
-    timeout: int = 30
+    def __init__(self) -> None:
+        self._user_agent = settings.SEC_USER_AGENT
+        self._timeout = settings.SEC_TIMEOUT
 
-    def download_document(
-        self,
-        url: str,
-    ) -> str:
-        """
-        Download the raw document located at the given SEC URL.
-
-        Args:
-            url:
-                Absolute SEC document URL.
-
-        Returns:
-            Raw document text.
-
-        Raises:
-            requests.HTTPError:
-                If the SEC request fails.
-        """
+    def download_document(self, url: str) -> str:
         response = requests.get(
             url,
             headers={
-                "User-Agent": self.user_agent,
+                "User-Agent": self._user_agent,
                 "Accept-Encoding": "gzip, deflate",
                 "Host": "www.sec.gov",
             },
-            timeout=self.timeout,
+            timeout=self._timeout,
         )
 
         response.raise_for_status()

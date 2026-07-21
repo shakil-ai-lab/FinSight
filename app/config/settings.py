@@ -41,5 +41,11 @@ class Settings(BaseSettings):
     # ==========================================================
     DATABASE_URL: str = "sqlite:///./data/finsight.db"
 
+    # ==========================================================
+    # SEC Configuration
+    # ==========================================================
+    SEC_USER_AGENT: str = "FinSight/1.0 sanjaralap@gmail.com"
+    SEC_TIMEOUT: int = 30
+
 
 settings = Settings()

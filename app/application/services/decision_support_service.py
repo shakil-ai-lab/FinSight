@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+
 
 from app.application.models import AnalysisInsights, DecisionResult
 
 
-class DecisionSupportService(ABC):
+class DecisionSupportService:
     """
     Defines the application capability responsible for
     evaluating the significance of analytical insights.
     """
 
-    @abstractmethod
+   
     def assess(
         self,
         insights: AnalysisInsights,
