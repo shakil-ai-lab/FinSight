@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from domain.analysis import AnalysisPlan
-from domain.documents import SourceDocument
+from app.domain.analysis import AnalysisPlan
+from app.domain.documents import SourceDocument
 
 
 class FilingProvider(ABC):
