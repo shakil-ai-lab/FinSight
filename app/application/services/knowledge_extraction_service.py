@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from app.application.models import (
-    ExtractedKnowledge,
-    ParsedDocument,
+from app.application.models import ExtractedKnowledge
+from app.application.ports import (
+    DocumentParser,
+    KnowledgeExtractor,
 )
-from app.application.ports import DocumentParser
 from app.domain.documents import DocumentBundle
 
 
@@ -17,26 +17,23 @@ class KnowledgeExtractionService:
     def __init__(
         self,
         parser: DocumentParser,
-    ) -> None:
+        extractor: KnowledgeExtractor,
+    ):
         self._parser = parser
+        self._extractor = extractor
 
     def extract(
         self,
         documents: DocumentBundle,
     ) -> ExtractedKnowledge:
-        
-        # print("Before parsing")
-        parsed_documents: list[ParsedDocument] = []
 
-        for document in documents.documents:
-            # print("Parsing document...")
-            parsed_documents.append(
-                self._parser.parse(document)
-            )
+        if not documents.documents:
+            raise ValueError("No documents available for extraction.")
 
-        # Temporary placeholder until the LLM extractor is implemented.
-        print(f"Parsed {len(parsed_documents)} document(s).")
+        parsed_document = self._parser.parse(
+            documents.documents[0]
+        )
 
-        raise NotImplementedError(
-            "Knowledge extraction mapping has not yet been implemented."
+        return self._extractor.extract(
+            parsed_document
         )
