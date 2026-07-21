@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.infrastructure.llm.gemini import GeminiClient
+
 from app.application.services import (
     PlanningService,
     DocumentAcquisitionService,
@@ -45,9 +47,11 @@ def main() -> None:
     )
 
     extraction_service = KnowledgeExtractionService(
-        parser=SECDocumentParser(),
-        extractor=GeminiKnowledgeExtractor(),
-    )
+    parser=SECDocumentParser(),
+    extractor=GeminiKnowledgeExtractor(
+        GeminiClient()
+    ),
+)
 
     # ------------------------------------------------------------------
     # Analysis Request
