@@ -4,13 +4,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from domain.insights import (
+from app.domain.insights import (
     CommunicationAnalysis,
     ConsistencyAnalysis,
     QuarterComparison,
     TrendAnalysis,
 )
-from domain.knowledge import RiskAssessment
+from app.domain.knowledge import RiskAssessment
 
 
 @dataclass(slots=True, frozen=True)

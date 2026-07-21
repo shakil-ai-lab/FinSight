@@ -5,7 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from domain.knowledge import FinancialSnapshot
+from app.domain.knowledge import FinancialSnapshot
 
 
 @dataclass(slots=True, frozen=True)

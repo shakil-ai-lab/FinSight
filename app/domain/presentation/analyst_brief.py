@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from domain.decision_support import MaterialityAssessment
+from app.domain.decision_support import MaterialityAssessment
 
 
 @dataclass(slots=True, frozen=True)

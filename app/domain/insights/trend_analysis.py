@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from domain.insights import QuarterComparison
+from app.domain.insights import QuarterComparison
 
 
 @dataclass(slots=True, frozen=True)

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from domain.knowledge import (
+from app.domain.knowledge import (
     FinancialSnapshot,
     ManagementDiscussion,
     GuidanceSummary,

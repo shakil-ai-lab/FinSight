@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from application.models import DecisionResult
+from app.application.models import DecisionResult
 
-from domain.presentation import AnalystBrief
+from app.domain.presentation import AnalystBrief
 
 
 class PresentationService(ABC):

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from domain.analysis import AnalysisRequest
-from domain.presentation import AnalystBrief
+from app.domain.analysis import AnalysisRequest
+from app.domain.presentation import AnalystBrief
 
-from application.services import (
+from app.application.services import (
     PlanningService,
     DocumentAcquisitionService,
     KnowledgeExtractionService,

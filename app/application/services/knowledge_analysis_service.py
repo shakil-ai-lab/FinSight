@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from application.models import AnalysisInsights, ExtractedKnowledge
+from app.application.models import AnalysisInsights, ExtractedKnowledge
 
 
 class KnowledgeAnalysisService(ABC):

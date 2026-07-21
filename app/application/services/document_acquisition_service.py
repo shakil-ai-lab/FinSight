@@ -1,28 +1,76 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from app.application.ports.filing_provider import FilingProvider
+from app.application.ports.transcript_provider import TranscriptProvider
+from app.domain.analysis import AnalysisPlan
+from app.domain.documents import (
+    DocumentBundle,
+    DocumentType,
+    SourceDocument,
+)
 
-from domain.analysis import AnalysisPlan
-from domain.documents import DocumentBundle
 
-
-class DocumentAcquisitionService(ABC):
+class DocumentAcquisitionService:
     """
-    Defines the application capability responsible for
-    acquiring all source documents required for analysis.
+    Coordinates the acquisition of all documents required for an analysis.
+
+    This service orchestrates the document providers and assembles
+    the acquired documents into a DocumentBundle.
     """
 
-    @abstractmethod
+    def __init__(
+        self,
+        filing_provider: FilingProvider,
+        transcript_provider: TranscriptProvider,
+    ) -> None:
+        self._filing_provider = filing_provider
+        self._transcript_provider = transcript_provider
+
     def acquire(
         self,
         plan: AnalysisPlan,
     ) -> DocumentBundle:
         """
-        Acquire the documents required by the analysis plan.
-
-        Returns
-        -------
-        DocumentBundle
-            The complete collection of source documents.
+        Acquire every document required by the analysis plan.
         """
-        raise NotImplementedError
+
+        documents: list[SourceDocument] = []
+
+        for document_type in plan.required_documents:
+
+            if document_type in (
+                DocumentType.TEN_K,
+                DocumentType.TEN_Q,
+            ):
+                documents.append(
+                    self._acquire_filing(plan)
+                )
+
+            elif document_type is DocumentType.EARNINGS_TRANSCRIPT:
+                documents.append(
+                    self._acquire_transcript(plan)
+                )
+
+        return DocumentBundle(
+            documents=tuple(documents),
+        )
+
+    def _acquire_filing(
+        self,
+        plan: AnalysisPlan,
+    ) -> SourceDocument:
+        """
+        Acquire an SEC filing.
+        """
+
+        return self._filing_provider.get_filing(plan)
+
+    def _acquire_transcript(
+        self,
+        plan: AnalysisPlan,
+    ) -> SourceDocument:
+        """
+        Acquire an earnings call transcript.
+        """
+
+        return self._transcript_provider.get_transcript(plan)

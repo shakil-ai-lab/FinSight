@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain. insights import(
+from app.domain.insights import(
     CommunicationAnalysis,
     ConsistencyAnalysis,
     QuarterComparison,

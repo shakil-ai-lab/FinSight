@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from application.models import ExtractedKnowledge
+from app.application.models import ExtractedKnowledge
 
-from domain.documents import DocumentBundle
+from app.domain.documents import DocumentBundle
 
 
 class KnowledgeExtractionService(ABC):
