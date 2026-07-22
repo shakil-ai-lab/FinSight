@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from app.domain.knowledge import RiskSeverity
+
 from app.infrastructure.llm.knowledge_extraction.extracted_knowledge_mapper import (
     ExtractedKnowledgeMapper,
 )
@@ -157,6 +159,129 @@ def test_management_discussion(
 
     print("✓ ManagementDiscussion mapping passed.")
 
+# Risk Assessment
+def test_risk_assessment(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
+
+    print("\nTesting RiskAssessment...")
+
+    data = {
+        "company": "Apple Inc.",
+        "fiscal_year": 2025,
+        "fiscal_quarter": 2,
+        "overall_summary": (
+            "Apple faces moderate operational risks."
+        ),
+        "risks": [
+            {
+                "title": "Supply Chain",
+                "category": "Operations",
+                "description": "Supplier disruptions.",
+                "severity": "High",
+                "evidence": "10-K Risk Factors",
+            },
+            {
+                "title": "Regulatory",
+                "category": "Legal",
+                "description": "Antitrust investigations.",
+                "severity": "Medium",
+                "evidence": "Regulatory filings",
+            },
+        ],
+    }
+
+    assessment = mapper._map_risk_assessment(data)
+
+    assert assessment.company == "Apple Inc."
+    assert assessment.fiscal_year == 2025
+    assert assessment.fiscal_quarter == 2
+
+    assert assessment.overall_summary == (
+        "Apple faces moderate operational risks."
+    )
+
+    assert len(assessment.risks) == 2
+
+    risk = assessment.risks[0]
+
+    assert risk.title == "Supply Chain"
+    assert risk.category == "Operations"
+    assert risk.description == "Supplier disruptions."
+    assert risk.severity == RiskSeverity.HIGH
+    assert risk.evidence == "10-K Risk Factors"
+
+    print("✓ RiskAssessment mapping passed.")    
+
+# guidance summary test
+def test_guidance_summary(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
+
+    print("\nTesting GuidanceSummary...")
+
+    data = {
+        "company": "Apple Inc.",
+        "fiscal_year": 2025,
+        "fiscal_quarter": 2,
+        "revenue_guidance": "High single-digit growth",
+        "earnings_guidance": "EPS expected to improve",
+        "margin_guidance": "Gross margin 46-47%",
+        "cash_flow_guidance": "Strong operating cash flow",
+        "capital_expenditure_guidance": "$12B planned",
+        "strategic_outlook": [
+            "Expand AI capabilities",
+            "Increase Services revenue",
+        ],
+        "management_expectations": [
+            "Continued long-term growth",
+            "Innovation remains priority",
+        ],
+    }
+
+    guidance = mapper._map_guidance_summary(data)
+
+    assert guidance.company == "Apple Inc."
+    assert guidance.fiscal_year == 2025
+    assert guidance.fiscal_quarter == 2
+
+    assert (
+        guidance.revenue_guidance
+        == "High single-digit growth"
+    )
+
+    assert (
+        guidance.earnings_guidance
+        == "EPS expected to improve"
+    )
+
+    assert (
+        guidance.margin_guidance
+        == "Gross margin 46-47%"
+    )
+
+    assert (
+        guidance.cash_flow_guidance
+        == "Strong operating cash flow"
+    )
+
+    assert (
+        guidance.capital_expenditure_guidance
+        == "$12B planned"
+    )
+
+    assert guidance.strategic_outlook == (
+        "Expand AI capabilities",
+        "Increase Services revenue",
+    )
+
+    assert guidance.management_expectations == (
+        "Continued long-term growth",
+        "Innovation remains priority",
+    )
+
+    print("✓ GuidanceSummary mapping passed.")
+
 
 def main() -> None:
 
@@ -171,6 +296,10 @@ def main() -> None:
     test_business_segments(mapper)
 
     test_management_discussion(mapper)
+
+    test_risk_assessment(mapper)
+
+    test_guidance_summary(mapper)
 
     print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")

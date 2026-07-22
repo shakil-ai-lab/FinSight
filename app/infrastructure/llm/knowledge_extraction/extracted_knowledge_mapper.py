@@ -11,6 +11,7 @@ from app.domain.knowledge import (
     GuidanceSummary,
     ManagementDiscussion,
     RiskAssessment,
+    Risk,
     RiskSeverity,
     TranscriptAnalysis,
 )
@@ -168,18 +169,82 @@ class ExtractedKnowledgeMapper:
                 data.get("management_commentary")
             ),
         )
+    
+    def _map_risk(
+    self,
+    data: dict[str, Any],) -> Risk:
+        """
+        Map a single risk dictionary into a Risk domain object.
+        """
+
+        return Risk(
+            title=self._require(data, "title"),
+            category=self._require(data, "category"),
+            description=self._require(data, "description"),
+            severity=self._to_severity(
+                self._require(data, "severity")
+            ),
+            evidence=data.get("evidence"),
+        )
 
     def _map_risk_assessment(
-        self,
-        data: dict[str, Any],
-    ) -> RiskAssessment:
-        raise NotImplementedError
+    self,
+    data: dict[str, Any],
+) -> RiskAssessment:
+        """
+        Map a risk assessment dictionary into a
+        RiskAssessment domain object.
+        """
 
+        risks = tuple(
+            self._map_risk(risk)
+            for risk in data.get("risks", [])
+        )
+
+        return RiskAssessment(
+            company=self._require(data, "company"),
+            fiscal_year=self._to_int(
+                self._require(data, "fiscal_year")
+            ),
+            fiscal_quarter=self._to_int(
+                data.get("fiscal_quarter")
+            ),
+            risks=risks,
+            overall_summary=data.get("overall_summary"),
+        )
+    
+    # map guidance summary
     def _map_guidance_summary(
-        self,
-        data: dict[str, Any],
-    ) -> GuidanceSummary:
-        raise NotImplementedError
+    self,
+    data: dict[str, Any],
+) -> GuidanceSummary:
+        """
+        Map a guidance summary dictionary into a
+        GuidanceSummary domain object.
+        """
+
+        return GuidanceSummary(
+            company=self._require(data, "company"),
+            fiscal_year=self._to_int(
+                self._require(data, "fiscal_year")
+            ),
+            fiscal_quarter=self._to_int(
+                data.get("fiscal_quarter")
+            ),
+            revenue_guidance=data.get("revenue_guidance"),
+            earnings_guidance=data.get("earnings_guidance"),
+            margin_guidance=data.get("margin_guidance"),
+            cash_flow_guidance=data.get("cash_flow_guidance"),
+            capital_expenditure_guidance=data.get(
+                "capital_expenditure_guidance"
+            ),
+            strategic_outlook=self._to_tuple(
+                data.get("strategic_outlook")
+            ),
+            management_expectations=self._to_tuple(
+                data.get("management_expectations")
+            ),
+        )
 
     def _map_transcript_analysis(
         self,
