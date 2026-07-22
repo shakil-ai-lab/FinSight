@@ -3,11 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.domain.knowledge import (
-    BusinessSegment,
+    BusinessSegments,
     FinancialSnapshot,
     GuidanceSummary,
     RiskAssessment,
     TranscriptAnalysis,
+    ManagementDiscussion,
 )
 
 @dataclass(frozen=True, slots=True)
@@ -22,7 +23,8 @@ class ExtractedKnowledge:
     """
 
     financial_snapshot: FinancialSnapshot
-    business_segments: BusinessSegment
+    business_segments: BusinessSegments
+    management_discussion: ManagementDiscussion
     risk_assessment: RiskAssessment
     guidance_summary: GuidanceSummary
     transcript_analysis: TranscriptAnalysis
