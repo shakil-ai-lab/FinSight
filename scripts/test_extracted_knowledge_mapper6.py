@@ -7,14 +7,13 @@ from app.infrastructure.llm.knowledge_extraction.extracted_knowledge_mapper impo
 )
 
 
-def main() -> None:
-    print("=" * 60)
-    print("ExtractedKnowledgeMapper Test")
-    print("=" * 60)
+def test_financial_snapshot(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
 
-    mapper = ExtractedKnowledgeMapper()
+    print("\nTesting FinancialSnapshot...")
 
-    snapshot_data = {
+    data = {
         "company": "Apple Inc.",
         "fiscal_year": 2025,
         "fiscal_quarter": 2,
@@ -26,40 +25,92 @@ def main() -> None:
         "operating_cash_flow": "28765000000",
     }
 
-    print("\nMapping FinancialSnapshot...")
+    snapshot = mapper._map_financial_snapshot(data)
 
-    financial_snapshot = mapper._map_financial_snapshot(snapshot_data)
+    assert snapshot.company == "Apple Inc."
+    assert snapshot.fiscal_year == 2025
+    assert snapshot.fiscal_quarter == 2
 
-    print("✓ FinancialSnapshot created successfully.\n")
+    assert snapshot.revenue == Decimal("94036000000")
+    assert snapshot.gross_margin == Decimal("0.462")
+    assert snapshot.operating_income == Decimal("29591000000")
+    assert snapshot.net_income == Decimal("24778000000")
+    assert snapshot.earnings_per_share == Decimal("1.65")
+    assert snapshot.operating_cash_flow == Decimal("28765000000")
 
-    print(financial_snapshot)
+    print("✓ FinancialSnapshot mapping passed.")
 
-    print("\nRunning Assertions...")
 
-    assert financial_snapshot.company == "Apple Inc."
-    assert financial_snapshot.fiscal_year == 2025
-    assert financial_snapshot.fiscal_quarter == 2
+def test_business_segments(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
 
-    assert financial_snapshot.revenue == Decimal("94036000000")
-    assert financial_snapshot.gross_margin == Decimal("0.462")
-    assert financial_snapshot.operating_income == Decimal("29591000000")
-    assert financial_snapshot.net_income == Decimal("24778000000")
-    assert financial_snapshot.earnings_per_share == Decimal("1.65")
-    assert financial_snapshot.operating_cash_flow == Decimal("28765000000")
+    print("\nTesting BusinessSegments...")
 
-    print("✓ Company OK")
-    print("✓ Fiscal Year OK")
-    print("✓ Fiscal Quarter OK")
-    print("✓ Revenue OK")
-    print("✓ Gross Margin OK")
-    print("✓ Operating Income OK")
-    print("✓ Net Income OK")
-    print("✓ EPS OK")
-    print("✓ Operating Cash Flow OK")
+    data = {
+        "company": "Apple Inc.",
+        "fiscal_year": 2025,
+        "fiscal_quarter": 2,
+        "segments": [
+            {
+                "name": "iPhone",
+                "revenue": "201000000000",
+                "operating_income": "85000000000",
+                "growth_rate": "5.2",
+                "description": "iPhone business",
+            },
+            {
+                "name": "Services",
+                "revenue": "96000000000",
+                "operating_income": "42000000000",
+                "growth_rate": "12.8",
+                "description": "Services business",
+            },
+        ],
+    }
 
-    print("\n" + "=" * 60)
+    business_segments = mapper._map_business_segments(data)
+
+    assert business_segments.company == "Apple Inc."
+    assert business_segments.fiscal_year == 2025
+    assert business_segments.fiscal_quarter == 2
+
+    assert len(business_segments.segments) == 2
+
+    iphone = business_segments.segments[0]
+
+    assert iphone.name == "iPhone"
+    assert iphone.revenue == Decimal("201000000000")
+    assert iphone.operating_income == Decimal("85000000000")
+    assert iphone.growth_rate == Decimal("5.2")
+    assert iphone.description == "iPhone business"
+
+    services = business_segments.segments[1]
+
+    assert services.name == "Services"
+    assert services.revenue == Decimal("96000000000")
+    assert services.operating_income == Decimal("42000000000")
+    assert services.growth_rate == Decimal("12.8")
+    assert services.description == "Services business"
+
+    print("✓ BusinessSegments mapping passed.")
+
+
+def main() -> None:
+
+    print("=" * 70)
+    print("ExtractedKnowledgeMapper Tests")
+    print("=" * 70)
+
+    mapper = ExtractedKnowledgeMapper()
+
+    test_financial_snapshot(mapper)
+
+    test_business_segments(mapper)
+
+    print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")
-    print("=" * 60)
+    print("=" * 70)
 
 
 if __name__ == "__main__":
