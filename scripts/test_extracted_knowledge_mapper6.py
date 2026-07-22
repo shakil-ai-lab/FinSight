@@ -95,6 +95,67 @@ def test_business_segments(
 
     print("✓ BusinessSegments mapping passed.")
 
+def test_management_discussion(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
+
+    print("\nTesting ManagementDiscussion...")
+
+    data = {
+        "company": "Apple Inc.",
+        "fiscal_year": 2025,
+        "fiscal_quarter": 2,
+        "business_summary": (
+            "Apple delivered record services revenue."
+        ),
+        "performance_drivers": [
+            "Strong iPhone demand",
+            "Growth in Services",
+        ],
+        "operational_highlights": [
+            "Expanded AI features",
+            "Supply chain improvements",
+        ],
+        "strategic_initiatives": [
+            "AI investment",
+            "Global expansion",
+        ],
+        "management_commentary": [
+            "Management remains optimistic.",
+        ],
+    }
+
+    discussion = mapper._map_management_discussion(data)
+
+    assert discussion.company == "Apple Inc."
+    assert discussion.fiscal_year == 2025
+    assert discussion.fiscal_quarter == 2
+
+    assert discussion.business_summary == (
+        "Apple delivered record services revenue."
+    )
+
+    assert discussion.performance_drivers == (
+        "Strong iPhone demand",
+        "Growth in Services",
+    )
+
+    assert discussion.operational_highlights == (
+        "Expanded AI features",
+        "Supply chain improvements",
+    )
+
+    assert discussion.strategic_initiatives == (
+        "AI investment",
+        "Global expansion",
+    )
+
+    assert discussion.management_commentary == (
+        "Management remains optimistic.",
+    )
+
+    print("✓ ManagementDiscussion mapping passed.")
+
 
 def main() -> None:
 
@@ -108,6 +169,8 @@ def main() -> None:
 
     test_business_segments(mapper)
 
+    test_management_discussion(mapper)
+    
     print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")
     print("=" * 70)

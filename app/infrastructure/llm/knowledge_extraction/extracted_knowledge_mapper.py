@@ -137,10 +137,36 @@ class ExtractedKnowledgeMapper:
     # ---------------------------------------------------------
 
     def _map_management_discussion(
-        self,
-        data: dict[str, Any],
+    self,
+    data: dict[str, Any],
     ) -> ManagementDiscussion:
-        raise NotImplementedError
+        """
+        Map a management discussion dictionary into a
+        ManagementDiscussion domain object.
+        """
+
+        return ManagementDiscussion(
+            company=self._require(data, "company"),
+            fiscal_year=self._to_int(
+                self._require(data, "fiscal_year")
+            ),
+            fiscal_quarter=self._to_int(
+                data.get("fiscal_quarter")
+            ),
+            business_summary=data.get("business_summary"),
+            performance_drivers=self._to_tuple(
+                data.get("performance_drivers")
+            ),
+            operational_highlights=self._to_tuple(
+                data.get("operational_highlights")
+            ),
+            strategic_initiatives=self._to_tuple(
+                data.get("strategic_initiatives")
+            ),
+            management_commentary=self._to_tuple(
+                data.get("management_commentary")
+            ),
+        )
 
     def _map_risk_assessment(
         self,
