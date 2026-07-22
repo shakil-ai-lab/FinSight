@@ -246,11 +246,40 @@ class ExtractedKnowledgeMapper:
             ),
         )
 
+    # map transcript analysis
     def _map_transcript_analysis(
         self,
         data: dict[str, Any],
     ) -> TranscriptAnalysis:
-        raise NotImplementedError
+        """
+        Map a transcript analysis dictionary into a
+        TranscriptAnalysis domain object.
+        """
+
+        return TranscriptAnalysis(
+            company=self._require(data, "company"),
+            fiscal_year=self._to_int(
+                self._require(data, "fiscal_year")
+            ),
+            fiscal_quarter=self._to_int(
+                data.get("fiscal_quarter")
+            ),
+            key_topics=self._to_tuple(
+                data.get("key_topics")
+            ),
+            analyst_questions=self._to_tuple(
+                data.get("analyst_questions")
+            ),
+            management_responses=self._to_tuple(
+                data.get("management_responses")
+            ),
+            notable_announcements=self._to_tuple(
+                data.get("notable_announcements")
+            ),
+            unanswered_concerns=self._to_tuple(
+                data.get("unanswered_concerns")
+            ),
+        )
 
     # ---------------------------------------------------------
     # Helper Methods

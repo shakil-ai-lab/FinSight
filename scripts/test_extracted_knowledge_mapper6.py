@@ -282,6 +282,70 @@ def test_guidance_summary(
 
     print("✓ GuidanceSummary mapping passed.")
 
+# 
+def test_transcript_analysis(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
+
+    print("\nTesting TranscriptAnalysis...")
+
+    data = {
+        "company": "Apple Inc.",
+        "fiscal_year": 2025,
+        "fiscal_quarter": 2,
+        "key_topics": [
+            "Artificial Intelligence",
+            "Services Growth",
+        ],
+        "analyst_questions": [
+            "How will AI impact revenue?",
+            "What is the outlook for Services?",
+        ],
+        "management_responses": [
+            "AI investments will continue.",
+            "Services remain a strategic priority.",
+        ],
+        "notable_announcements": [
+            "New AI platform announced.",
+            "Share buyback expanded.",
+        ],
+        "unanswered_concerns": [
+            "China demand uncertainty",
+        ],
+    }
+
+    transcript = mapper._map_transcript_analysis(data)
+
+    assert transcript.company == "Apple Inc."
+    assert transcript.fiscal_year == 2025
+    assert transcript.fiscal_quarter == 2
+
+    assert transcript.key_topics == (
+        "Artificial Intelligence",
+        "Services Growth",
+    )
+
+    assert transcript.analyst_questions == (
+        "How will AI impact revenue?",
+        "What is the outlook for Services?",
+    )
+
+    assert transcript.management_responses == (
+        "AI investments will continue.",
+        "Services remain a strategic priority.",
+    )
+
+    assert transcript.notable_announcements == (
+        "New AI platform announced.",
+        "Share buyback expanded.",
+    )
+
+    assert transcript.unanswered_concerns == (
+        "China demand uncertainty",
+    )
+
+    print("✓ TranscriptAnalysis mapping passed.")
+
 
 def main() -> None:
 
@@ -300,6 +364,8 @@ def main() -> None:
     test_risk_assessment(mapper)
 
     test_guidance_summary(mapper)
+
+    test_transcript_analysis(mapper)
 
     print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")
