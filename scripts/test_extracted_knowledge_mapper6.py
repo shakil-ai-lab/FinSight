@@ -346,6 +346,54 @@ def test_transcript_analysis(
 
     print("✓ TranscriptAnalysis mapping passed.")
 
+# test mapper
+def test_mapper(
+    mapper: ExtractedKnowledgeMapper,
+) -> None:
+
+    print("\nTesting Complete Mapper...")
+
+    data = {
+        "financial_snapshot": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+            "fiscal_quarter": 2,
+            "revenue": "94036000000",
+        },
+        "business_segments": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+            "segments": [],
+        },
+        "management_discussion": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+        },
+        "risk_assessment": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+            "risks": [],
+        },
+        "guidance_summary": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+        },
+        "transcript_analysis": {
+            "company": "Apple Inc.",
+            "fiscal_year": 2025,
+        },
+    }
+
+    knowledge = mapper.map(data)
+
+    assert knowledge.financial_snapshot.company == "Apple Inc."
+    assert knowledge.business_segments.company == "Apple Inc."
+    assert knowledge.management_discussion.company == "Apple Inc."
+    assert knowledge.risk_assessment.company == "Apple Inc."
+    assert knowledge.guidance_summary.company == "Apple Inc."
+    assert knowledge.transcript_analysis.company == "Apple Inc."
+
+    print("✓ Complete mapper passed.")
 
 def main() -> None:
 
@@ -366,6 +414,8 @@ def main() -> None:
     test_guidance_summary(mapper)
 
     test_transcript_analysis(mapper)
+
+    test_mapper(mapper)
 
     print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")

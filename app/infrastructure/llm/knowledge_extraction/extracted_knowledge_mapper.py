@@ -33,11 +33,29 @@ class ExtractedKnowledgeMapper:
         data: dict[str, Any],
     ) -> ExtractedKnowledge:
         """
-        Full mapping is intentionally deferred until all
-        component mappers are implemented.
+        Map a validated LLM response into an
+        ExtractedKnowledge application model.
         """
-        raise NotImplementedError(
-            "Full knowledge mapping has not been implemented yet."
+
+        return ExtractedKnowledge(
+            financial_snapshot=self._map_financial_snapshot(
+                self._require(data, "financial_snapshot")
+            ),
+            business_segments=self._map_business_segments(
+                self._require(data, "business_segments")
+            ),
+            management_discussion=self._map_management_discussion(
+                self._require(data, "management_discussion")
+            ),
+            risk_assessment=self._map_risk_assessment(
+                self._require(data, "risk_assessment")
+            ),
+            guidance_summary=self._map_guidance_summary(
+                self._require(data, "guidance_summary")
+            ),
+            transcript_analysis=self._map_transcript_analysis(
+                self._require(data, "transcript_analysis")
+            ),
         )
 
     # ---------------------------------------------------------
