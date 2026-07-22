@@ -95,6 +95,7 @@ def test_business_segments(
 
     print("✓ BusinessSegments mapping passed.")
 
+# management discusssion test
 def test_management_discussion(
     mapper: ExtractedKnowledgeMapper,
 ) -> None:
@@ -170,7 +171,7 @@ def main() -> None:
     test_business_segments(mapper)
 
     test_management_discussion(mapper)
-    
+
     print("\n" + "=" * 70)
     print("All mapper tests passed successfully.")
     print("=" * 70)
