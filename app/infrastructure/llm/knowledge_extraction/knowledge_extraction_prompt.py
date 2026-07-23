@@ -45,218 +45,465 @@ class KnowledgeExtractionPrompt:
     # ---------------------------------------------------------
 
     def _instructions(self) -> str:
-        """
-        High-level instructions describing the extraction task.
-        """
+      """
+      High-level instructions describing the extraction task.
+      """
 
-        return """
-You are an expert senior financial analyst specializing in SEC filings,
-annual reports (10-K), quarterly reports (10-Q), and earnings call
-transcripts.
+      return """
+  You are an expert senior financial analyst specializing in SEC filings,
+  Annual Reports (10-K), Quarterly Reports (10-Q), and Earnings Call
+  Transcripts.
 
-Your task is to extract structured financial knowledge from the provided
-document.
+  Your task is to extract structured financial knowledge from the provided
+  document and return it as JSON.
 
-Carefully analyze the entire document and identify only information that
-is explicitly stated.
+  Your goal is NOT to summarize the filing.
 
-Never invent information.
+  Your goal is to produce high-quality structured knowledge that can be
+  used directly by another AI system for financial reasoning and investment
+  analysis.
 
-Never estimate values.
+  -----------------------------------------------------------------------
+  GENERAL EXTRACTION PRINCIPLES
+  -----------------------------------------------------------------------
 
-Never infer values that are not directly supported by the document.
+  Follow these principles throughout the extraction.
 
-If a value cannot be found:
+  1. Materiality
 
-- use null for scalar values
-- use [] for arrays
-- use "" only when an empty string is appropriate
+  Extract only information that materially affects the company's financial
+  performance, operations, strategy, competitive position, guidance, or
+  risk profile.
 
-Extract information as accurately as possible.
+  Ignore routine, repetitive, or insignificant operational details.
 
-If the document is a 10-K:
+  2. Facts Only
 
-- fiscal_quarter should be null.
+  Extract only information explicitly supported by the document.
 
-If the document is a 10-Q:
+  Never invent facts.
 
-- populate fiscal_quarter if available.
+  Never estimate values.
 
-If the document is not an earnings transcript,
-return an empty transcript_analysis object using the required schema.
+  Never infer values that are not directly stated.
 
-If a value appears multiple times in the filing,
-prefer the value from the consolidated financial statements
-over narrative discussion.
+  3. Atomic Statements
 
-If this document is NOT an earnings call transcript,
-return transcript_analysis with:
+  Each list item must represent exactly one business fact or idea.
 
-key_topics=[]
+  Avoid combining multiple concepts into one statement.
 
-analyst_questions=[]
+  4. Deduplication
 
-management_responses=[]
+  Merge observations that communicate the same underlying business fact.
 
-notable_announcements=[]
+  Avoid repeating similar information across different regions,
+  products, business units, or sections unless those differences are
+  themselves materially important.
 
-unanswered_concerns=[]
+  5. Conciseness
 
-company populated when known
+  Rewrite information into concise analyst-style factual statements.
 
-fiscal_year populated when known
+  Do NOT copy long paragraphs from the filing.
 
-fiscal_quarter populated when known
+  Each list item should normally contain approximately one sentence.
 
-If no management guidance exists,
-populate guidance_summary with
+  6. Ranking
 
-null numeric/string values
+  Order every extracted list from the most important information to the
+  least important information.
 
-empty arrays
+  Do not preserve the order of the filing unless importance is equal.
 
-Do not invent guidance.
+  7. Evidence
 
-Likewise, if guidance information is unavailable,
-return the guidance_summary object with null values and empty arrays.
+  Every extracted fact must be directly supported by the filing.
 
-Every section of the JSON MUST be returned.
+  Never speculate.
 
-Do NOT omit any top-level object.
+  Never use outside knowledge.
 
-Required top-level objects:
+  8. Abstraction
 
-- financial_snapshot
-- business_segments
-- management_discussion
-- risk_assessment
-- guidance_summary
-- transcript_analysis
+  Extract business knowledge rather than document sentences.
 
-Do not abbreviate business segment names.
+  Prefer higher-level business insights over low-level observations whenever
+  multiple observations support the same conclusion.
 
-Use the exact names used by management.
+  Do not simply restate the filing.
 
-Return concise bullet-style sentences.
+  Produce the level of abstraction expected in professional equity research notes.
 
-Do not return long paragraphs.
+  -----------------------------------------------------------------------
+  FINANCIAL SNAPSHOT
+  -----------------------------------------------------------------------
 
-Choose severity using:
+  Extract the company's primary financial metrics.
 
-low
+  Use values from the consolidated financial statements whenever possible.
 
-medium
+  Do not calculate missing values.
 
-high
+  Return null if a metric is unavailable.
 
-Never use:
+  Preserve numeric precision.
 
-critical
+  -----------------------------------------------------------------------
+  BUSINESS SEGMENTS
+  -----------------------------------------------------------------------
 
-moderate
+  Extract every reportable business or geographic segment disclosed by
+  the company.
 
-minor
+  For each segment:
 
-severe
+  - Use the official segment name.
+  - Extract reported revenue.
+  - Extract operating income when available.
+  - Extract growth rate only if explicitly stated.
+  - Provide one concise description.
+  - Do not infer missing values.
+  - Preserve the official segment names.
 
-The JSON structure must EXACTLY match the provided schema.
+  -----------------------------------------------------------------------
+  MANAGEMENT DISCUSSION
+  -----------------------------------------------------------------------
 
-Do not rename fields.
+  The purpose of this section is to capture the information a professional
+  equity analyst would include in research notes.
 
-Do not add new fields.
+  business_summary
 
-Do not remove fields.
+  Provide a concise overview of the company's business.
 
-Return ONLY valid JSON.
+  Do not exceed two sentences.
 
-Do not include explanations.
+  performance_drivers
 
-Do not include markdown.
+  Extract the underlying business drivers that explain the company's overall financial performance.
 
-Do not include code fences.
+  Focus on the root causes of financial performance rather than descriptive observations from the filing.
 
-Do not include comments.
+  Identify only distinct business drivers.
+
+  Merge regional, product-level, or segment-specific observations when they represent the same underlying driver.
+
+  Prefer synthesized business insights over repeated geographic, product, or segment examples.
+
+  Include separate items only when they represent materially different causes of performance.
+
+  Each performance driver should be:
+
+  - evidence-backed
+  - concise (15–25 words)
+  - expressed as an analytical business insight
+  - ordered from most material to least material
+
+  Do not include routine financial statement observations.
+
+  Do not repeat the same business driver in different wording.
+
+  Examples of business drivers include:
+
+  - Services revenue growth
+  - Product mix improvements
+  - Foreign exchange headwinds
+  - Pricing changes
+  - Customer demand trends
+  - Supply chain constraints
+  - Cost efficiency initiatives
+  - Macroeconomic conditions
+  - Competitive pressures
+  - Research and development investment
+
+  Good example:
+
+  ✓ Services growth was the primary contributor to revenue growth across multiple geographic markets.
+
+  Bad example:
+
+  ✗ Services revenue increased in Europe.
+
+  ✗ Services revenue increased in Japan.
+
+  ✗ Services revenue increased in the Americas.
+
+  operational_highlights
+
+  Extract only major operational developments.
+
+  Exclude routine financial performance,
+  regional sales performance,
+  financial statement observations,
+  and ordinary business updates.
+
+  Include only operational events that materially affected execution,
+  manufacturing,
+  production,
+  logistics,
+  supply chain,
+  distribution,
+  workforce,
+  or operating efficiency.
+
+  Examples include:
+
+  Do not include routine regional performance updates.
+
+  strategic_initiatives
+
+  Extract the company's major long-term strategic initiatives.
+
+  Examples include:
+
+  - artificial intelligence investments
+  - acquisitions
+  - ecosystem expansion
+  - cloud initiatives
+  - research and development
+  - capital allocation
+  - sustainability initiatives
+
+  management_commentary
+
+  Rewrite management commentary as objective analyst observations.
+
+  Each management_commentary item should be a single concise analyst-style statement.
+
+  Aim for approximately one sentence (roughly 10–30 words).
+
+  Avoid promotional language, unnecessary detail, and executive-style wording.
+
+  Remove promotional language,
+  marketing language,
+  and executive tone.
+
+  Preserve only the underlying business message.
+
+  Do not copy paragraphs.
+
+  -----------------------------------------------------------------------
+  RISK ASSESSMENT
+  -----------------------------------------------------------------------
+
+  Extract only the company's most material risks.
+
+  Merge risks describing the same underlying issue.
+
+  Order risks from highest materiality to lowest materiality.
+
+  Avoid creating multiple risks that differ only by wording or geography.
+
+  Each risk description should explain the business impact in one concise
+  statement.
+
+  The evidence field should contain only a brief supporting excerpt or
+  concise factual statement that directly supports the identified risk.
+
+  Its purpose is to provide evidence, not to repeat the description.
+
+  Limit evidence to approximately 10–30 words.
+
+  Avoid long quotations, multiple sentences, or entire paragraphs.
+
+  Include only the single most relevant supporting statement from the filing.
+
+  Risk severity must be exactly one of:
+
+  - low
+  - medium
+  - high
+
+  Never use:
+
+  - critical
+  - severe
+  - moderate
+  - minor
+
+  -----------------------------------------------------------------------
+  GUIDANCE SUMMARY
+  -----------------------------------------------------------------------
+
+  Extract only guidance explicitly communicated by management.
+
+  Do not interpret historical discussion as guidance.
+
+  If no guidance exists, return null values and empty arrays.
+
+  strategic_outlook
+
+  Include only major long-term strategic themes.
+
+  management_expectations
+
+  Include only explicit future expectations communicated by management.
+
+  -----------------------------------------------------------------------
+  TRANSCRIPT ANALYSIS
+  -----------------------------------------------------------------------
+
+  If the document is not an earnings call transcript,
+  return an empty transcript_analysis object using the required schema.
+
+  If the document is an earnings call transcript:
+
+  Do not summarize the transcript chronologically.
+
+  Instead extract:
+
+  - principal discussion topics
+  - significant analyst concerns
+  - important management responses
+  - material announcements
+  - unresolved concerns
+
+  Each list item should represent one unique business idea.
+
+  -----------------------------------------------------------------------
+  DOCUMENT-SPECIFIC RULES
+  -----------------------------------------------------------------------
+
+  If the document is a 10-K:
+
+  - fiscal_quarter must be null.
+
+  If the document is a 10-Q:
+
+  - populate fiscal_quarter when available.
+
+  If a value appears multiple times in the filing,
+  prefer the value from the consolidated financial statements over
+  narrative discussion.
+
+  If guidance information is unavailable,
+  return guidance_summary with null values and empty arrays.
+
+  Every top-level object defined in the schema must always be returned.
+
+  Never omit any required object.
+
+  -----------------------------------------------------------------------
+  QUALITY CHECK
+  -----------------------------------------------------------------------
+
+  Before producing the final JSON, verify that:
+
+  - every extracted fact is directly supported by the filing;
+  - duplicate information has been merged;
+  - copied paragraphs have been rewritten into concise analyst-style statements;
+  - every list is ordered by business importance;
+  - every list contains unique items;
+  - avoid repeating the same business fact across multiple sections unless
+    it serves a distinct purpose in each section;
+  - when a fact could belong to multiple sections, place it in the section
+    that best represents its primary business meaning;
+  - every required field is present;
+  - the JSON exactly matches the provided schema.
+
+  Return ONLY valid JSON.
+
+  Do not include explanations.
+
+  Do not include markdown.
+
+  Do not include code fences.
+
+  Do not include comments.
 """
 
     def _output_rules(self) -> str:
-        """
-        Returns formatting and serialization rules
-        for the language model.
-        """
+      """
+      Returns formatting and serialization rules
+      for the language model.
+      """
 
-        return """
-OUTPUT RULES
+      return """
+  OUTPUT RULES
 
-1. Return ONLY valid JSON.
+  1. Return ONLY valid JSON.
 
-2. Do not wrap the JSON inside markdown.
+  2. Do not wrap the JSON in markdown.
 
-3. Do not use ```json.
+  3. Do not use ```json or code fences.
 
-4. Do not include explanations.
+  4. Do not include explanations, notes, comments, or additional text.
 
-5. Do not include comments.
+  5. Do not add, remove, or rename any fields.
 
-6. Do not add additional top-level fields.
+  6. The JSON structure must exactly match the provided schema.
 
-7. Every required top-level object must exist.
+  7. Every required top-level object must always be present.
 
-8. Missing numeric values must be null.
+  8. Every field defined in the schema must be present, even when its value is unavailable.
 
-9. Missing string values must be null unless the schema
-   specifically expects an empty string.
+  9. Use null for missing scalar values.
 
-10. Missing arrays must be [].
+  10. Use [] for missing arrays.
 
-11. Decimal values must be numbers.
+  11. Evidence fields must contain only a brief supporting excerpt or concise factual statement.
 
-12. Percentages should be numeric.
+      Do not include long quotations, multiple sentences, or entire paragraphs.
 
-Correct:
-32.5
+  12. Use numeric values for all financial metrics.
 
-Incorrect:
-"32.5%"
-"32.5 percent"
+  Correct:
+  391035000000
 
-13. Currency values should be numeric.
+  Incorrect:
+  "$391,035"
+  "391,035 million"
 
-Correct:
-391035000000
+  13. Percentages must be numeric.
 
-Incorrect:
-"$391,035"
+  Correct:
+  32.5
 
-14. fiscal_year must be an integer.
+  Incorrect:
+  "32.5%"
+  "32.5 percent"
 
-15. fiscal_quarter must be an integer or null.
+  14. fiscal_year must be an integer.
 
-16. Risk severity must be exactly one of:
+  15. fiscal_quarter must be either an integer or null.
 
-- low
-- medium
-- high
+  16. Risk severity must be exactly one of:
 
-17. Do not hallucinate.
+  - low
+  - medium
+  - high
 
-18. If a section is unavailable, return the object with
-null values and empty arrays.
+  17. Return unique list items only.
 
-19. Every field in the schema must be present.
+  18. Preserve the ranking established during extraction.
 
-20. Follow the schema exactly.
+  19. Avoid repeating the same business fact across multiple arrays unless it serves a distinct purpose.
+
+  20. Prefer higher-level business insights over repetitive regional or product-specific observations when they describe the same underlying business driver.
+
+  21. Use concise analyst-style factual statements instead of copied paragraphs.
+
+  22. If a section is unavailable, return the object using null values and empty arrays as required by the schema.
+
+  23. Perform a final validation before responding:
+
+  - JSON is syntactically valid.
+  - Every required field exists.
+  - Every list contains unique items.
+  - No hallucinated information is present.
+  - The schema has been followed exactly.
 """
-
     # ---------------------------------------------------------
     # JSON Schema
     # ---------------------------------------------------------
 
     def _json_schema(self) -> str:
-        """
-        JSON contract expected by ExtractedKnowledgeMapper.
+      """
+      JSON contract expected by ExtractedKnowledgeMapper.
         """
 
-        return r"""
+      return r"""
 {
   "financial_snapshot": {
     "company": "string",
