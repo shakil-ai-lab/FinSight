@@ -1,5 +1,8 @@
 import json
 
+import json
+
+from app.application.exceptions import ResponseParsingError
 
 class ResponseParser:
     """
@@ -20,11 +23,13 @@ class ResponseParser:
             Parsed dictionary.
 
         Raises:
-            ValueError:
+            ResponseParsingError:
                 If the response is not valid JSON.
         """
         try:
             return json.loads(response)
 
         except json.JSONDecodeError as exc:
-            raise ValueError("Gemini returned invalid JSON.") from exc
+            raise ResponseParsingError(
+                "Gemini returned invalid JSON."
+            ) from exc

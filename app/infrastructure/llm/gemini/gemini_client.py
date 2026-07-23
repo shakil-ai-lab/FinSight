@@ -8,6 +8,14 @@ from time import sleep
 
 from google.genai.errors import ServerError
 
+from app.core.logging import get_logger
+
+from app.application.exceptions import (
+    LLMGenerationError,
+    InvalidLLMResponseError,
+)
+
+logger = get_logger(__name__)
 
 class GeminiClient:
     """
@@ -23,9 +31,9 @@ class GeminiClient:
         self._model = settings.MODEL_NAME
 
     def generate(
-    self,
-    prompt: str,
-) -> str:
+        self,
+        prompt: str,
+    ) -> str:
         """
         Send a prompt to Gemini and return the generated text.
 
@@ -36,24 +44,41 @@ class GeminiClient:
 
         for attempt in range(max_retries):
             try:
-
                 response = self._client.models.generate_content(
                     model=self._model,
                     contents=prompt,
                 )
 
-                return response.text or ""
+                text = response.text
 
-            except ServerError:
+                if text is None or not text.strip():
+                    raise InvalidLLMResponseError(
+                        "Gemini returned an empty response."
+                    )
 
-                if attempt == max_retries - 1:
-                    raise
+                return text
 
-                wait_time = 5 * (attempt + 1)
+            except ServerError as exc:
 
-                print(
-                    f"Gemini unavailable. "
-                    f"Retrying in {wait_time} seconds..."
-                )
+                if attempt < max_retries - 1:
+                    wait_time = 5 * (attempt + 1)
 
-                sleep(wait_time)
+                    logger.warning(
+                        "Gemini unavailable. Retrying in %s seconds...",
+                        wait_time,
+                    )
+
+                    sleep(wait_time)
+                    continue
+
+                raise LLMGenerationError(
+                    "Gemini service is temporarily unavailable."
+                ) from exc
+
+            except InvalidLLMResponseError:
+                raise
+
+            except Exception as exc:
+                raise LLMGenerationError(
+                    "Failed to generate content using Gemini."
+                ) from exc

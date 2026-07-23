@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.application.exceptions import MappingError
+
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -29,35 +31,40 @@ class ExtractedKnowledgeMapper:
     """
 
     def map(
-        self,
-        data: dict[str, Any],
-    ) -> ExtractedKnowledge:
+    self,
+    data: dict[str, Any],
+) -> ExtractedKnowledge:
         """
         Map a validated LLM response into an
         ExtractedKnowledge application model.
         """
 
-        return ExtractedKnowledge(
-            financial_snapshot=self._map_financial_snapshot(
-                self._require(data, "financial_snapshot")
-            ),
-            business_segments=self._map_business_segments(
-                self._require(data, "business_segments")
-            ),
-            management_discussion=self._map_management_discussion(
-                self._require(data, "management_discussion")
-            ),
-            risk_assessment=self._map_risk_assessment(
-                self._require(data, "risk_assessment")
-            ),
-            guidance_summary=self._map_guidance_summary(
-                self._require(data, "guidance_summary")
-            ),
-            transcript_analysis=self._map_transcript_analysis(
-                self._require(data, "transcript_analysis")
-            ),
-        )
+        try:
+            return ExtractedKnowledge(
+                financial_snapshot=self._map_financial_snapshot(
+                    self._require(data, "financial_snapshot")
+                ),
+                business_segments=self._map_business_segments(
+                    self._require(data, "business_segments")
+                ),
+                management_discussion=self._map_management_discussion(
+                    self._require(data, "management_discussion")
+                ),
+                risk_assessment=self._map_risk_assessment(
+                    self._require(data, "risk_assessment")
+                ),
+                guidance_summary=self._map_guidance_summary(
+                    self._require(data, "guidance_summary")
+                ),
+                transcript_analysis=self._map_transcript_analysis(
+                    self._require(data, "transcript_analysis")
+                ),
+            )
 
+        except (TypeError, ValueError) as exc:
+            raise MappingError(
+                "Failed to map extracted knowledge into domain objects."
+            ) from exc
     # ---------------------------------------------------------
     # Financial Snapshot
     # ---------------------------------------------------------

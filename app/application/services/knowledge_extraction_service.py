@@ -7,6 +7,12 @@ from app.application.ports import (
 )
 from app.domain.documents import DocumentBundle
 
+from app.application.exceptions import KnowledgeExtractionError
+
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 class KnowledgeExtractionService:
     """
@@ -14,26 +20,28 @@ class KnowledgeExtractionService:
     knowledge from acquired documents.
     """
 
-    def __init__(
-        self,
-        parser: DocumentParser,
-        extractor: KnowledgeExtractor,
-    ):
-        self._parser = parser
-        self._extractor = extractor
-
     def extract(
         self,
         documents: DocumentBundle,
     ) -> ExtractedKnowledge:
 
-        if not documents.documents:
-            raise ValueError("No documents available for extraction.")
+        try:
 
-        parsed_document = self._parser.parse(
-            documents.documents[0]
-        )
+            if not documents.documents:
+                raise KnowledgeExtractionError(
+                    "No documents available for extraction."
+                )
 
-        return self._extractor.extract(
-            parsed_document
-        )
+            parsed_document = self._parser.parse(
+                documents.documents[0]
+            )
+
+            return self._extractor.extract(
+                parsed_document
+            )
+
+        except KnowledgeExtractionError:
+            logger.exception(
+                "Knowledge extraction service failed."
+            )
+            raise

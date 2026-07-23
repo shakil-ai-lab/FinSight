@@ -15,6 +15,10 @@ from .response_parser import ResponseParser
 from .extracted_knowledge_mapper import (
     ExtractedKnowledgeMapper,
 )
+from app.application.exceptions import KnowledgeExtractionError
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class GeminiKnowledgeExtractor(KnowledgeExtractor):
@@ -59,22 +63,43 @@ class GeminiKnowledgeExtractor(KnowledgeExtractor):
         self._mapper = mapper
 
     def extract(
-        self,
-        document: ParsedDocument,
-    ) -> ExtractedKnowledge:
+    self,
+    document: ParsedDocument,
+) -> ExtractedKnowledge:
         """
         Extract structured financial knowledge from a
         parsed SEC document.
         """
 
-        prompt = self._prompt.build(document)
+        try:
+            logger.info("Building extraction prompt.")
+            prompt = self._prompt.build(document)
 
-        response = self._client.generate(prompt)
+            logger.info("Generating response from Gemini.")
+            response = self._client.generate(prompt)
 
-        parsed_response = self._response_parser.parse(
-            response
-        )
+            logger.info("Parsing Gemini response.")
+            parsed_response = self._response_parser.parse(
+                response
+            )
 
-        return self._mapper.map(
-            parsed_response
-        )
+            logger.info("Mapping extracted knowledge.")
+            result = self._mapper.map(parsed_response)
+
+            logger.info("Knowledge extraction pipeline completed.")
+            return result
+
+        except KnowledgeExtractionError:
+            logger.exception(
+                "Knowledge extraction failed."
+            )
+            raise
+
+        except Exception as exc:
+            logger.exception(
+                "Unexpected error during knowledge extraction."
+            )
+
+            raise KnowledgeExtractionError(
+                "Knowledge extraction pipeline failed."
+            ) from exc
