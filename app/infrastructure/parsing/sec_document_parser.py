@@ -15,7 +15,7 @@ class SECDocumentParser(DocumentParser):
     clean readable text suitable for downstream knowledge extraction.
     """
 
-    def parse(self, document: SourceDocument) -> str:
+    def parse(self, document: SourceDocument) -> ParsedDocument:
         """
         Parse an SEC filing into plain text.
 

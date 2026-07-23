@@ -4,6 +4,10 @@ from google import genai
 
 from app.config.settings import settings
 
+from time import sleep
+
+from google.genai.errors import ServerError
+
 
 class GeminiClient:
     """
@@ -19,16 +23,37 @@ class GeminiClient:
         self._model = settings.MODEL_NAME
 
     def generate(
-        self,
-        prompt: str,
-    ) -> str:
+    self,
+    prompt: str,
+) -> str:
         """
         Send a prompt to Gemini and return the generated text.
+
+        Retries automatically when Gemini is temporarily unavailable.
         """
 
-        response = self._client.models.generate_content(
-            model=self._model,
-            contents=prompt,
-        )
+        max_retries = 3
 
-        return response.text
+        for attempt in range(max_retries):
+            try:
+
+                response = self._client.models.generate_content(
+                    model=self._model,
+                    contents=prompt,
+                )
+
+                return response.text or ""
+
+            except ServerError:
+
+                if attempt == max_retries - 1:
+                    raise
+
+                wait_time = 5 * (attempt + 1)
+
+                print(
+                    f"Gemini unavailable. "
+                    f"Retrying in {wait_time} seconds..."
+                )
+
+                sleep(wait_time)
