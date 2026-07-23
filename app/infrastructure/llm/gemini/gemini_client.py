@@ -44,6 +44,9 @@ class GeminiClient:
 
         for attempt in range(max_retries):
             try:
+
+                logger.info("Sending request to Gemini model '%s'.", self._model)
+
                 response = self._client.models.generate_content(
                     model=self._model,
                     contents=prompt,
@@ -55,6 +58,8 @@ class GeminiClient:
                     raise InvalidLLMResponseError(
                         "Gemini returned an empty response."
                     )
+                
+                logger.info("Received response from Gemini.")
 
                 return text
 

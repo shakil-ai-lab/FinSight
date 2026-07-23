@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from app.core import configure_logging
+
 from app.domain.documents import (
     DocumentSource,
     DocumentType,
@@ -124,6 +126,8 @@ def validate_results(knowledge) -> None:
 
 
 def main() -> None:
+
+    configure_logging()
 
     print("=" * 80)
     print("Gemini Knowledge Extraction Integration Test")

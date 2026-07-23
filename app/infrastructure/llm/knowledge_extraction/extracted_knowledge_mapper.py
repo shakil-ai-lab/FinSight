@@ -17,7 +17,9 @@ from app.domain.knowledge import (
     RiskSeverity,
     TranscriptAnalysis,
 )
+from app.core.logging import get_logger
 
+logger = get_logger(__name__)
 
 class ExtractedKnowledgeMapper:
     """
@@ -40,6 +42,8 @@ class ExtractedKnowledgeMapper:
         """
 
         try:
+            logger.info("Mapping LLM response into domain objects.")
+
             return ExtractedKnowledge(
                 financial_snapshot=self._map_financial_snapshot(
                     self._require(data, "financial_snapshot")
@@ -60,6 +64,8 @@ class ExtractedKnowledgeMapper:
                     self._require(data, "transcript_analysis")
                 ),
             )
+
+            logger.info("Domain object mapping completed.")
 
         except (TypeError, ValueError) as exc:
             raise MappingError(

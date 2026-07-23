@@ -27,18 +27,24 @@ class KnowledgeExtractionService:
 
         try:
 
+            logger.info("Starting knowledge extraction service.")
+
             if not documents.documents:
                 raise KnowledgeExtractionError(
                     "No documents available for extraction."
                 )
 
+            logger.info("Parsing document.")
+
             parsed_document = self._parser.parse(
                 documents.documents[0]
             )
 
-            return self._extractor.extract(
-                parsed_document
-            )
+            extract_document = self._extractor.extract(parsed_document)
+
+            logger.info("Knowledge extraction completed successfully.")
+
+            return extract_document
 
         except KnowledgeExtractionError:
             logger.exception(
