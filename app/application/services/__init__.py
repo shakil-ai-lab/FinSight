@@ -5,6 +5,7 @@ from .knowledge_analysis_service import KnowledgeAnalysisService
 from .decision_support_service import DecisionSupportService
 from .presentation_service import PresentationService
 
+
 __all__ = [
     "PlanningService",
     "DocumentAcquisitionService",
@@ -12,4 +13,5 @@ __all__ = [
     "KnowledgeAnalysisService",
     "DecisionSupportService",
     "PresentationService",
+    
 ]

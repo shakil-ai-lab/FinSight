@@ -1,23 +1,55 @@
 from __future__ import annotations
 
-
-
-from app.application.models import AnalysisInsights, DecisionResult
+from app.application.models.analysis_insights import AnalysisInsights
+from app.application.models.decision_result import DecisionResult
+from app.application.models.extracted_knowledge import ExtractedKnowledge
+from app.application.ports.decision_support_engine import (
+    DecisionSupportEngine,
+)
 
 
 class DecisionSupportService:
     """
-    Defines the application capability responsible for
-    evaluating the significance of analytical insights.
+    Application service responsible for executing the
+    Decision Support capability.
+
+    Responsibilities
+    ----------------
+    - Coordinate the Decision Support workflow.
+    - Delegate reasoning to the configured DecisionSupportEngine.
     """
 
-   
-    def assess(
+    def __init__(
         self,
+        decision_support_engine: DecisionSupportEngine,
+    ) -> None:
+        self._decision_support_engine = decision_support_engine
+
+    def generate_decision_support(
+        self,
+        knowledge: ExtractedKnowledge,
         insights: AnalysisInsights,
     ) -> DecisionResult:
         """
-        Produce the decision support result from
-        analytical insights.
+        Generate the final decision support result.
+
+        Parameters
+        ----------
+        knowledge:
+            Structured financial knowledge extracted from
+            source documents.
+
+        insights:
+            Analytical insights produced by the Knowledge
+            Analysis capability.
+
+        Returns
+        -------
+        DecisionResult
+            Final decision support output.
         """
-        raise NotImplementedError
+
+        return self._decision_support_engine.generate(
+            knowledge=knowledge,
+            insights=insights,
+        )

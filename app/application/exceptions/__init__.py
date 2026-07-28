@@ -22,6 +22,8 @@ from .knowledge_analysis import (
     MappingError,
 )
 
+from .decision_support import DecisionSupportError
+
 __all__ = [
     "ApplicationError",
     "PlanningError",
@@ -34,5 +36,6 @@ __all__ = [
     "ResponseParsingError",
     "MappingError",
     "KnowledgeAnalysisError",
+    "DecisionSupportError"
     
 ]

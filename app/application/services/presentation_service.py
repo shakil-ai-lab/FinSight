@@ -1,24 +1,26 @@
 from __future__ import annotations
 
-
-
 from app.application.models import DecisionResult
+from app.application.ports.presentation_engine import PresentationEngine
 
 from app.domain.presentation import AnalystBrief
 
 
 class PresentationService:
     """
-    Defines the application capability responsible for
-    presenting the final analyst report.
+    Application service responsible for producing the
+    final analyst brief.
     """
 
-    
+    def __init__(
+        self,
+        engine: PresentationEngine,
+    ) -> None:
+        self._engine = engine
+
     def present(
         self,
         result: DecisionResult,
     ) -> AnalystBrief:
-        """
-        Produce the final analyst brief.
-        """
-        raise NotImplementedError
+
+        return self._engine.present(result)

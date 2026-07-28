@@ -80,13 +80,7 @@ class GeminiKnowledgeExtractor(KnowledgeExtractor):
             logger.info("Generating response from Gemini.")
 
             response = self._client.generate(prompt)
-#############################################
-            print("\n" + "=" * 80)
-            print("RAW GEMINI RESPONSE")
-            print("=" * 80)
-            print(repr(response))
-            print("=" * 80)
-#############################################
+
             logger.info("Parsing Gemini response.")
 
             parsed_response = self._response_parser.parse(

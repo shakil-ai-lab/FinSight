@@ -34,15 +34,15 @@ class MaterialityAssessment:
     - Analyst Brief Generation
     """
 
-    quarter_comparison: QuarterComparison
-
-    trend_analysis: TrendAnalysis
-
     consistency_analysis: ConsistencyAnalysis
 
     communication_analysis: CommunicationAnalysis
 
     risk_assessment: RiskAssessment
+
+    quarter_comparison: QuarterComparison | None = None
+
+    trend_analysis: TrendAnalysis | None = None
 
     critical_findings: tuple[str, ...] = ()
 
