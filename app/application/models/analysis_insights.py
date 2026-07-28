@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from dataclasses import dataclass
 
 from app.domain.insights import(
@@ -15,14 +17,10 @@ class AnalysisInsights:
     """
     Aggregates all analytical insights generated from
     extracted business knowledge.
-
-    This model represents the complete output of the
-    Knowledge Analysis capability and serves as the
-    contract between KnowledgeAnalysisService and
-    DecisionSupportService.
     """
 
-    quarter_comparison: QuarterComparison
-    trend_analysis: TrendAnalysis
     consistency_analysis: ConsistencyAnalysis
     communication_analysis: CommunicationAnalysis
+
+    quarter_comparison: Optional[QuarterComparison] = None
+    trend_analysis: Optional[TrendAnalysis] = None

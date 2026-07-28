@@ -35,7 +35,7 @@ class CommunicationAnalysis:
 
     management_discussion: ManagementDiscussion
 
-    transcript_analysis: TranscriptAnalysis
+    transcript_analysis: Optional[TranscriptAnalysis] = None
 
     guidance_summary: Optional[GuidanceSummary] = None
 

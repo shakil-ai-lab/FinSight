@@ -1,22 +1,26 @@
 from __future__ import annotations
 
-
-
-from app.application.models import AnalysisInsights, ExtractedKnowledge
+from app.application.models import (
+    AnalysisInsights,
+    ExtractedKnowledge,
+)
+from app.application.ports import KnowledgeAnalyzer
 
 
 class KnowledgeAnalysisService:
     """
-    Defines the application capability responsible for
-    analyzing extracted business knowledge.
+    Application service responsible for coordinating
+    the Knowledge Analysis capability.
     """
 
-    
+    def __init__(
+        self,
+        analyzer: KnowledgeAnalyzer,
+    ) -> None:
+        self._analyzer = analyzer
+
     def analyze(
         self,
         knowledge: ExtractedKnowledge,
     ) -> AnalysisInsights:
-        """
-        Produce analytical insights from extracted knowledge.
-        """
-        raise NotImplementedError
+        return self._analyzer.analyze(knowledge)

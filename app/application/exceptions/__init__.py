@@ -13,6 +13,15 @@ from .knowledge_extraction import (
     MappingError,
 )
 
+from .knowledge_analysis import (
+    KnowledgeAnalysisError,
+    PromptGenerationError,
+    LLMGenerationError,
+    InvalidLLMResponseError,
+    ResponseParsingError,
+    MappingError,
+)
+
 __all__ = [
     "ApplicationError",
     "PlanningError",
@@ -24,4 +33,6 @@ __all__ = [
     "InvalidLLMResponseError",
     "ResponseParsingError",
     "MappingError",
+    "KnowledgeAnalysisError",
+    
 ]

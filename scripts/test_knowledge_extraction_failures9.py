@@ -28,7 +28,7 @@ from app.infrastructure.llm.knowledge_extraction import (
     ResponseParser,
 )
 
-# TEST_CASE = "mapper_failure"    >>> not tested
+# TEST_CASE = "mapper_failure"    >>> not tested(have to redesign it later on)
 # TEST_CASE = "invalid_severity"  >>> not tested
 
 # TEST_CASE = None

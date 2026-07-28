@@ -72,21 +72,33 @@ class GeminiKnowledgeExtractor(KnowledgeExtractor):
         """
 
         try:
+
             logger.info("Building extraction prompt.")
+
             prompt = self._prompt.build(document)
 
             logger.info("Generating response from Gemini.")
-            response = self._client.generate(prompt)
 
+            response = self._client.generate(prompt)
+#############################################
+            print("\n" + "=" * 80)
+            print("RAW GEMINI RESPONSE")
+            print("=" * 80)
+            print(repr(response))
+            print("=" * 80)
+#############################################
             logger.info("Parsing Gemini response.")
+
             parsed_response = self._response_parser.parse(
                 response
             )
 
             logger.info("Mapping extracted knowledge.")
+
             result = self._mapper.map(parsed_response)
 
             logger.info("Knowledge extraction pipeline completed.")
+
             return result
 
         except KnowledgeExtractionError:
