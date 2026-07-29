@@ -10,6 +10,8 @@ from app.application.services import (
 )
 from app.domain.analysis import AnalysisRequest
 
+from app.application.services import PresentationServicecl
+
 
 class AnalysisOrchestrator:
     """
@@ -26,12 +28,14 @@ class AnalysisOrchestrator:
         knowledge_extraction_service: KnowledgeExtractionService,
         knowledge_analysis_service: KnowledgeAnalysisService,
         decision_support_service: DecisionSupportService,
+        presentation_service: PresentationService,
     ) -> None:
         self._planning_service = planning_service
         self._document_acquisition_service = document_acquisition_service
         self._knowledge_extraction_service = knowledge_extraction_service
         self._knowledge_analysis_service = knowledge_analysis_service
         self._decision_support_service = decision_support_service
+        self._presentation_service = presentation_service
 
     def analyze(
         self,
@@ -49,9 +53,13 @@ class AnalysisOrchestrator:
 
         insights = self._knowledge_analysis_service.analyze(knowledge)
 
-        decision = self._decision_support_service.generate_decision_support(
-            knowledge=knowledge,
-            insights=insights,
+        decision_result = (
+        self._decision_support_service.generate_decision_support(
+        knowledge=knowledge,
+        insights=insights,
+          )
         )
 
-        return decision
+        analyst_brief = self._presentation_service.present(decision_result)
+
+        return analyst_brief
