@@ -19,6 +19,21 @@ class KnowledgeExtractionService:
     Application service responsible for extracting structured
     knowledge from acquired documents.
     """
+    def __init__(
+        self,
+        parser: DocumentParser,
+        extractor: KnowledgeExtractor,
+    ) -> None:
+        self._parser = parser
+        self._extractor = extractor
+
+    def __init__(
+        self,
+        parser: DocumentParser,
+        extractor: KnowledgeExtractor,
+    ) -> None:
+        self._parser = parser
+        self._extractor = extractor
 
     def extract(
         self,

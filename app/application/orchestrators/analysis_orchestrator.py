@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from app.application.models.decision_result import DecisionResult
+from app.application.models import PresentationOutput
 from app.application.services import (
     PlanningService,
     DocumentAcquisitionService,
     KnowledgeExtractionService,
     KnowledgeAnalysisService,
     DecisionSupportService,
+    PresentationService,
 )
 from app.domain.analysis import AnalysisRequest
-
-from app.application.services import PresentationServicecl
 
 
 class AnalysisOrchestrator:
@@ -40,7 +39,7 @@ class AnalysisOrchestrator:
     def analyze(
         self,
         request: AnalysisRequest,
-    ) -> DecisionResult:
+    ) -> PresentationOutput:
         """
         Execute the complete financial analysis workflow.
         """
@@ -54,12 +53,15 @@ class AnalysisOrchestrator:
         insights = self._knowledge_analysis_service.analyze(knowledge)
 
         decision_result = (
-        self._decision_support_service.generate_decision_support(
-        knowledge=knowledge,
-        insights=insights,
-          )
+            self._decision_support_service.generate_decision_support(
+                knowledge=knowledge,
+                insights=insights,
+            )
         )
 
-        analyst_brief = self._presentation_service.present(decision_result)
+        presentation_output = self._presentation_service.present(
+            knowledge=knowledge,
+            result=decision_result,
+        )
 
-        return analyst_brief
+        return presentation_output

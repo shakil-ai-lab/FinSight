@@ -2,21 +2,24 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from datetime import datetime
+
 import streamlit as st
+
+from app.domain.analysis import AnalysisRequest, AnalysisType
 
 
 @dataclass(slots=True, frozen=True)
-class SidebarState:
+class SidebarResult:
     """
-    User selections from the Streamlit sidebar.
+    Result returned by the Streamlit sidebar.
     """
 
-    company_ticker: str
-    filing_type: str
+    analysis_request: AnalysisRequest
     analyze_clicked: bool
 
 
-def render_sidebar() -> SidebarState:
+def render_sidebar() -> SidebarResult:
     """
     Render the application sidebar and return the user's selections.
     """
@@ -35,6 +38,24 @@ def render_sidebar() -> SidebarState:
             options=["10-K", "10-Q"],
             index=0,
         )
+        current_year = datetime.now().year
+
+        fiscal_year = st.number_input(
+            "Fiscal Year",
+            min_value=2000,
+            max_value=current_year,
+            value=current_year - 1,
+            step=1,
+        )
+
+        fiscal_quarter = None
+
+        if filing_type == "10-Q":
+            fiscal_quarter = st.selectbox(
+                "Fiscal Quarter",
+                options=[1, 2, 3, 4],
+                index=0,
+            )
 
         st.divider()
 
@@ -44,8 +65,19 @@ def render_sidebar() -> SidebarState:
             use_container_width=True,
         )
 
-    return SidebarState(
-        company_ticker=company_ticker,
-        filing_type=filing_type,
+    analysis_request = AnalysisRequest(
+        company=company_ticker,
+        ticker=company_ticker,
+        analysis_type=(
+            AnalysisType.ANNUAL
+            if filing_type == "10-K"
+            else AnalysisType.QUARTERLY
+        ),
+        fiscal_year=int(fiscal_year),
+        fiscal_quarter=fiscal_quarter,
+)
+
+    return SidebarResult(
+        analysis_request=analysis_request,
         analyze_clicked=analyze_clicked,
     )

@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+import streamlit as st
+
+from app.interfaces.streamlit.mappers.dashboard_mapper import (
+    map_dashboard,
+)
+
+from app.bootstrap import build_analysis_orchestrator
+
 from app.interfaces.streamlit.components.analysis_tabs import (
     render_analysis_tabs,
 )
@@ -31,6 +39,7 @@ def render_dashboard() -> None:
     Currently uses demonstration data.
     Later this page will call AnalysisOrchestrator.
     """
+    # orchestrator = build_analysis_orchestrator()
 
     # ------------------------------------------------------------
     # Header
@@ -44,27 +53,34 @@ def render_dashboard() -> None:
 
     sidebar = render_sidebar()
 
+    if "brief" not in st.session_state:
+        st.session_state.brief = None
+
+    if sidebar.analyze_clicked:
+        orchestrator = build_analysis_orchestrator()
+        st.session_state.brief = orchestrator.analyze(
+            sidebar.analysis_request
+        )
+
+    brief = st.session_state.brief
+
+    if brief is None:
+        st.info("Select a company, Filing Type, Fiscal Year and click 'Analyze Company' to begin.")
+        return
+
+    view = map_dashboard(brief)
     # ------------------------------------------------------------
     # Demo Data
     # ------------------------------------------------------------
-
-    recommendation = "Buy"
-
-    executive_summary = (
-        "Apple Inc. remains a premier cash-generating powerhouse "
-        "with strong operating cash flow, excellent capital returns, "
-        "and continued Services growth. Investors should monitor "
-        "regulatory developments and the slowdown in Greater China."
-    )
 
     # ------------------------------------------------------------
     # Recommendation
     # ------------------------------------------------------------
 
     render_recommendation_card(
-        recommendation=recommendation,
-        overall_assessment=executive_summary,
-        confidence="High",
+        recommendation=view.recommendation,
+        overall_assessment=view.overall_assessment,
+        confidence=view.confidence,
     )
 
     # ------------------------------------------------------------
@@ -72,7 +88,7 @@ def render_dashboard() -> None:
     # ------------------------------------------------------------
 
     render_executive_summary(
-        executive_summary,
+        view.executive_summary,
     )
 
     # ------------------------------------------------------------
@@ -80,10 +96,10 @@ def render_dashboard() -> None:
     # ------------------------------------------------------------
 
     render_financial_snapshot(
-        revenue="$391.04B",
-        operating_cash_flow="$118.25B",
-        net_income="$93.74B",
-        diluted_eps="$6.08",
+        revenue=view.revenue,
+        operating_cash_flow=view.operating_cash_flow,
+        net_income=view.net_income,
+        diluted_eps=view.earnings_per_share,
     )
 
     # ------------------------------------------------------------
@@ -91,33 +107,7 @@ def render_dashboard() -> None:
     # ------------------------------------------------------------
 
     render_business_segments(
-        [
-            BusinessSegmentView(
-                "Americas",
-                "$167.0B",
-                "+2.76%",
-            ),
-            BusinessSegmentView(
-                "Europe",
-                "$101.3B",
-                "+7.46%",
-            ),
-            BusinessSegmentView(
-                "Greater China",
-                "$66.9B",
-                "-7.73%",
-            ),
-            BusinessSegmentView(
-                "Japan",
-                "$25.0B",
-                "+5.12%",
-            ),
-            BusinessSegmentView(
-                "Rest of Asia Pacific",
-                "$30.7B",
-                "+8.10%",
-            ),
-        ]
+        view.business_segments,
     )
 
     # ------------------------------------------------------------
@@ -125,34 +115,10 @@ def render_dashboard() -> None:
     # ------------------------------------------------------------
 
     render_analysis_tabs(
-        risk_assessment=[
-            "Regulatory pressure continues to increase globally.",
-            "Manufacturing concentration remains high in Asia.",
-            "Greater China revenue continues to decline.",
-        ],
-        consistency_analysis=[
-            "Financial performance remains highly consistent.",
-            "Strong operating cash flow continues to support dividends.",
-        ],
-        communication_analysis=[
-            "Management tone remains optimistic.",
-            "Future AI initiatives received significant emphasis.",
-        ],
-        investment_highlights=[
-            "$110.2B returned to shareholders.",
-            "Services continues double-digit profitability.",
-            "Operating Cash Flow reached $118.25B.",
-        ],
-        key_risks=[
-            "Greater China slowdown.",
-            "European antitrust investigations.",
-            "Supply chain concentration.",
-        ],
+        risk_assessment=view.risk_assessment,
+        consistency_analysis=view.consistency_analysis,
+        communication_analysis=view.communication_analysis,
+        investment_highlights=view.investment_highlights,
+        key_risks=view.key_risks,
     )
 
-    # ------------------------------------------------------------
-    # Future
-    # ------------------------------------------------------------
-
-    if sidebar.analyze_clicked:
-        pass
