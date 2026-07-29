@@ -1,0 +1,40 @@
+# Git
+.git
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+finsight-env/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment files
+.env
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local database
+data/finsight.db
+
+# Raw downloaded files
+data/raw/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
