@@ -130,33 +130,111 @@ Provides a geographical revenue breakdown together with growth analysis for each
 
 # 🏗 System Architecture
 
-FinSight follows **Clean Architecture** and **Domain-Driven Design (DDD)** to keep business logic independent from frameworks and external services.
+FinSight is built using **Clean Architecture** with **Domain-Driven Design (DDD)**. The architecture separates business logic from frameworks and external services, making the application modular, testable, and maintainable.
 
+```text
+                        User
+                          │
+                          ▼
+                Presentation Layer
+            (Streamlit Dashboard / UI)
+                          │
+                          ▼
+                 Application Layer
+        (Use Cases & Business Services)
+                   │              ▲
+                   ▼              │
+               Domain Layer       │
+     (Business Models & Rules)    │
+                                  │
+          Infrastructure Layer ───┘
+   (LLMs, SEC API, Database, Parsing)
 ```
-                    Presentation Layer
-                     (Streamlit UI)
-                            │
-                            ▼
-                  Application Layer
-          (Use Cases & Business Services)
-                            │
-                            ▼
-                     Domain Layer
-            (Business Models & Rules)
-                            │
-                            ▼
-                Infrastructure Layer
-      (Gemini, SEC API, Database, Parsing)
-```
 
-This architecture ensures:
+## Layer Responsibilities
 
-- Separation of concerns
-- Loose coupling
-- High maintainability
-- Testability
-- Easy replacement of external services
-- Better scalability
+### 🖥 Presentation Layer
+
+The Presentation Layer is responsible for interacting with the user.
+
+**Responsibilities**
+
+- Streamlit Dashboard
+- User Input
+- Display Results
+- User Experience
+
+This layer contains **no business logic**. It simply sends user requests to the Application Layer and displays the generated results.
+
+---
+
+### ⚙️ Application Layer
+
+The Application Layer coordinates the entire financial analysis workflow.
+
+**Responsibilities**
+
+- Planning
+- Document Acquisition
+- Knowledge Extraction
+- Knowledge Analysis
+- Decision Support
+- Presentation Service
+
+This layer orchestrates the use cases of the system. It does **not** implement business rules itself; instead, it coordinates the Domain Layer and communicates with the Infrastructure Layer through abstractions (ports/interfaces).
+
+---
+
+### 💼 Domain Layer
+
+The Domain Layer is the heart of the application.
+
+It contains the core financial concepts and business rules that are independent of any framework or external technology.
+
+Examples include:
+
+- FinancialSnapshot
+- BusinessSegments
+- RiskAssessment
+- GuidanceSummary
+- TranscriptAnalysis
+- AnalystBrief
+
+Because this layer contains only business logic, it can remain unchanged even if the UI, database, or AI model changes.
+
+---
+
+### 🔧 Infrastructure Layer
+
+The Infrastructure Layer implements all external integrations required by the application.
+
+Examples include:
+
+- Google Gemini Client
+- SEC Filing Provider
+- Earnings Call Provider
+- Document Parser
+- ChromaDB
+- SQLite
+- Logging
+- Configuration
+
+This layer communicates with external systems but never contains business rules.
+
+---
+
+## Why Clean Architecture?
+
+This architecture provides several advantages:
+
+- **Separation of Concerns** – Each layer has a single responsibility.
+- **Maintainability** – Changes in one layer have minimal impact on others.
+- **Testability** – Business logic can be tested independently.
+- **Scalability** – New features can be added without major redesign.
+- **Loose Coupling** – External services can be replaced easily.
+- **Framework Independence** – The core business logic does not depend on Streamlit, FastAPI, or Gemini.
+
+For example, replacing the Gemini API with another LLM provider requires changes only in the Infrastructure Layer, while the Domain and Application layers remain unchanged.
 
 ---
 
