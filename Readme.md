@@ -101,7 +101,7 @@ FinSight aims to automate this process by:
 
 ## 🏠 Investment Recommendation
 
-![Home Dashboard](app/interfaces/streamlit/assets/home_snapshot.jpg)
+![Home Dashboard](app/interfaces/streamlit/assets/home_sanpshot.jpg)
 
 The dashboard provides an explainable investment recommendation together with a confidence score and investment rationale.
 
@@ -109,7 +109,7 @@ The dashboard provides an explainable investment recommendation together with a 
 
 ## 💰 Financial Snapshot
 
-![Financial Snapshot](app/interfaces/streamlit/assets/financial_snapshot.jpg)
+![Financial Snapshot](app/interfaces/streamlit/assets/financial_segment.jpg)
 
 Displays the company's key financial indicators, including:
 
