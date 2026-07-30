@@ -101,7 +101,7 @@ FinSight aims to automate this process by:
 
 ## 🏠 Investment Recommendation
 
-![Home](assets/home_snapshot.jpg)
+![Home Dashboard](app/interfaces/streamlit/assets/home_snapshot.png)
 
 The dashboard provides an explainable investment recommendation together with a confidence score and investment rationale.
 
@@ -109,7 +109,7 @@ The dashboard provides an explainable investment recommendation together with a 
 
 ## 💰 Financial Snapshot
 
-![Financial Snapshot](assets/financial_segment.jpg)
+![Financial Snapshot](app/interfaces/streamlit/assets/financial_snapshot.png)
 
 Displays the company's key financial indicators, including:
 
@@ -122,13 +122,12 @@ Displays the company's key financial indicators, including:
 
 ## 🌍 Business Segment Analysis
 
-![Business Segment](assets/business_segment.jpg)
+![Business Segment](app/interfaces/streamlit/assets/business_segment.png)
 
 Provides a geographical revenue breakdown together with growth analysis for each business segment.
 
 ---
 
-# 🏗 System Architecture
 # 🏗 System Architecture
 
 FinSight is built using **Clean Architecture** with **Domain-Driven Design (DDD)**. The architecture separates business logic from frameworks and external services, making the application modular, testable, and maintainable.
