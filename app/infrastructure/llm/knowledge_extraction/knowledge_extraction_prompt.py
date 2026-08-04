@@ -149,6 +149,46 @@ class KnowledgeExtractionPrompt:
 
   Preserve numeric precision.
 
+  IMPORTANT:
+
+  Many SEC filings state monetary values in units such as:
+
+  - dollars
+  - thousands
+  - millions
+  - billions
+
+  Normalize every monetary value into absolute U.S. dollars before returning the JSON.
+
+  Examples:
+
+  If the filing states:
+
+  Revenue = 215,938 (in millions)
+
+  Return:
+
+  215938000000
+
+  If the filing states:
+
+  Cash Flow = 12,450 (in thousands)
+
+  Return:
+
+  12450000
+
+  Do NOT return values in millions, thousands, or billions.
+
+  Only return absolute dollar amounts.
+
+  Do NOT normalize:
+
+  - earnings_per_share
+  - gross_margin
+  - growth_rate
+  - percentages
+
   -----------------------------------------------------------------------
   BUSINESS SEGMENTS
   -----------------------------------------------------------------------
@@ -446,14 +486,27 @@ class KnowledgeExtractionPrompt:
 
       Do not include long quotations, multiple sentences, or entire paragraphs.
 
-  12. Use numeric values for all financial metrics.
+  12. Use numeric values for every monetary metric.
+
+  All monetary values MUST be returned in absolute U.S. dollars,
+  regardless of the reporting unit used in the SEC filing.
+
+  Never return values in:
+
+  - thousands
+  - millions
+  - billions
 
   Correct:
+
   391035000000
 
   Incorrect:
+
+  391035
+  391035 million
+  391.0 billion
   "$391,035"
-  "391,035 million"
 
   13. Percentages must be numeric.
 
