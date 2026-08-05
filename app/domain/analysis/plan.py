@@ -7,6 +7,11 @@ from typing import Optional
 
 from .request import AnalysisRequest, DocumentType
 
+from app.domain.documents import (
+    DocumentRequest,
+    DocumentType,
+)
+
 
 class CapabilityType(Enum):
     """
@@ -56,6 +61,10 @@ class AnalysisPlan:
     """
 
     request: AnalysisRequest
+
+    document_requests: tuple[DocumentRequest, ...] = field(
+    default_factory=tuple
+)
 
     required_documents: tuple[DocumentType, ...] = field(default_factory=tuple)
 

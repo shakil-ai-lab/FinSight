@@ -6,6 +6,8 @@ from .document import (
 
 from .filing_metadata import FilingMetadata
 
+from .document_request import DocumentRequest
+
 from .bundle import DocumentBundle
 
 __all__ = [
@@ -13,5 +15,6 @@ __all__ = [
     "DocumentSource",
     "SourceDocument",
     "DocumentBundle",
-    "FilingMetadata"
+    "FilingMetadata",
+    "DocumentRequest"
 ]
