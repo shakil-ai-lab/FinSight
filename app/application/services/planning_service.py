@@ -6,7 +6,10 @@ from app.domain.analysis import (
     AnalysisType,
     CapabilityType,
 )
-from app.domain.documents import DocumentType
+from app.domain.documents import (
+    DocumentRequest,
+    DocumentType,
+)
 
 
 class PlanningService:
@@ -36,7 +39,9 @@ class PlanningService:
                     required_documents.append(DocumentType.TEN_Q)
 
                 case AnalysisType.TRANSCRIPT:
-                    required_documents.append(DocumentType.EARNINGS_TRANSCRIPT)
+                    required_documents.append(
+                        DocumentType.EARNINGS_TRANSCRIPT
+                    )
 
                 case AnalysisType.COMPREHENSIVE:
                     required_documents.extend(
@@ -45,6 +50,11 @@ class PlanningService:
                             DocumentType.EARNINGS_TRANSCRIPT,
                         ]
                     )
+
+        document_requests = self._build_document_requests(
+            request=request,
+            required_documents=required_documents,
+        )
 
         capabilities = (
             CapabilityType.DOCUMENT_ACQUISITION,
@@ -57,6 +67,29 @@ class PlanningService:
         return AnalysisPlan(
             request=request,
             required_documents=tuple(required_documents),
+            document_requests=tuple(document_requests),
             capabilities=capabilities,
             description=f"{request.company} financial analysis",
         )
+
+    def _build_document_requests(
+        self,
+        request: AnalysisRequest,
+        required_documents: list[DocumentType],
+    ) -> list[DocumentRequest]:
+        """
+        Build acquisition requests for every required document.
+        """
+
+        document_requests: list[DocumentRequest] = []
+
+        for document_type in required_documents:
+            document_requests.append(
+                DocumentRequest(
+                    document_type=document_type,
+                    fiscal_year=request.fiscal_year,
+                    fiscal_quarter=request.fiscal_quarter,
+                )
+            )
+
+        return document_requests

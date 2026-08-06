@@ -5,6 +5,7 @@ from app.application.ports.transcript_provider import TranscriptProvider
 from app.domain.analysis import AnalysisPlan
 from app.domain.documents import (
     DocumentBundle,
+    DocumentRequest,
     DocumentType,
     SourceDocument,
 )
@@ -30,25 +31,31 @@ class DocumentAcquisitionService:
         self,
         plan: AnalysisPlan,
     ) -> DocumentBundle:
-        """
-        Acquire every document required by the analysis plan.
-        """
 
         documents: list[SourceDocument] = []
 
-        for document_type in plan.required_documents:
+        for document_request in plan.document_requests:
 
-            if document_type in (
+            if document_request.document_type in (
                 DocumentType.TEN_K,
                 DocumentType.TEN_Q,
             ):
                 documents.append(
-                    self._acquire_filing(plan)
+                    self._acquire_filing(
+                        plan=plan,
+                        document_request=document_request,
+                    )
                 )
 
-            elif document_type is DocumentType.EARNINGS_TRANSCRIPT:
+            elif (
+                document_request.document_type
+                is DocumentType.EARNINGS_TRANSCRIPT
+            ):
                 documents.append(
-                    self._acquire_transcript(plan)
+                    self._acquire_transcript(
+                        plan=plan,
+                        document_request=document_request,
+                    )
                 )
 
         return DocumentBundle(
@@ -58,19 +65,21 @@ class DocumentAcquisitionService:
     def _acquire_filing(
         self,
         plan: AnalysisPlan,
+        document_request: DocumentRequest,
     ) -> SourceDocument:
-        """
-        Acquire an SEC filing.
-        """
 
-        return self._filing_provider.get_filing(plan)
+        return self._filing_provider.get_filing(
+            plan=plan,
+            document_request=document_request,
+        )
 
     def _acquire_transcript(
         self,
         plan: AnalysisPlan,
+        document_request: DocumentRequest,
     ) -> SourceDocument:
-        """
-        Acquire an earnings call transcript.
-        """
 
-        return self._transcript_provider.get_transcript(plan)
+        return self._transcript_provider.get_transcript(
+            plan=plan,
+            document_request=document_request,
+        )

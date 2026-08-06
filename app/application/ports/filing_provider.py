@@ -3,7 +3,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from app.domain.analysis import AnalysisPlan
-from app.domain.documents import SourceDocument
+from app.domain.documents import (
+    DocumentRequest,
+    SourceDocument,
+)
 
 
 class FilingProvider(ABC):
@@ -16,9 +19,9 @@ class FilingProvider(ABC):
     def get_filing(
         self,
         plan: AnalysisPlan,
+        document_request: DocumentRequest,
     ) -> SourceDocument:
         """
-        Retrieve the filing document required by the
-        analysis plan.
+        Retrieve the filing specified by the document request.
         """
         raise NotImplementedError

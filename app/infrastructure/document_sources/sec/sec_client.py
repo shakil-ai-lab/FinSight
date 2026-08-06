@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import requests
 
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 from app.config.settings import settings
 
 
@@ -11,17 +14,32 @@ class SECClient:
     """
 
     def __init__(self) -> None:
-        self._user_agent = settings.SEC_USER_AGENT
         self._timeout = settings.SEC_TIMEOUT
 
+        self._headers = {
+            "User-Agent": settings.SEC_USER_AGENT,
+            "Accept-Encoding": "gzip, deflate",
+        }
+
+        retry_strategy = Retry(
+            total=3,
+            connect=3,
+            read=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET"],
+        )
+
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+
+        self._session = requests.Session()
+        self._session.mount("https://", adapter)
+        self._session.mount("http://", adapter)
+
     def download_document(self, url: str) -> str:
-        response = requests.get(
+        response = self._session.get(
             url,
-            headers={
-                "User-Agent": self._user_agent,
-                "Accept-Encoding": "gzip, deflate",
-                
-            },
+            headers=self._headers,
             timeout=self._timeout,
         )
 
@@ -33,13 +51,9 @@ class SECClient:
         self,
         url: str,
     ) -> dict:
-        response = requests.get(
+        response = self._session.get(
             url,
-            headers={
-                "User-Agent": self._user_agent,
-                "Accept-Encoding": "gzip, deflate",
-                
-            },
+            headers=self._headers,
             timeout=self._timeout,
         )
 
