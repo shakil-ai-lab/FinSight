@@ -24,6 +24,8 @@ from .knowledge_analysis import (
 
 from .decision_support import DecisionSupportError
 
+from . company_not_found import CompanyNotFoundError
+
 __all__ = [
     "ApplicationError",
     "PlanningError",
@@ -36,6 +38,7 @@ __all__ = [
     "ResponseParsingError",
     "MappingError",
     "KnowledgeAnalysisError",
-    "DecisionSupportError"
+    "DecisionSupportError",
+    "CompanyNotFoundError",
     
 ]

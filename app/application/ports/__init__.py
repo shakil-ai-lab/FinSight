@@ -4,6 +4,7 @@ from .document_parser import DocumentParser
 from .knowledge_extractor import KnowledgeExtractor
 from .knowledge_analyzer import KnowledgeAnalyzer
 from .decision_support_engine import DecisionSupportEngine
+from .company_resolution_port import CompanyResolutionPort
 
 __all__ = [
     "FilingProvider",
@@ -11,5 +12,6 @@ __all__ = [
     "DocumentParser",
     "KnowledgeExtractor",
     "KnowledgeAnalyzer",
-    "DecisionSupportEngine"
+    "DecisionSupportEngine",
+    "CompanyResolutionPort",
 ]
