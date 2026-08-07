@@ -75,3 +75,5 @@ class SECClient:
         return self.download_json(
             f"https://data.sec.gov/submissions/CIK{cik_str}.json"
         )
+
+    
