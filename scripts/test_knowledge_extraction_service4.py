@@ -21,7 +21,7 @@ from app.infrastructure.parsing import (
     SECDocumentParser,
 )
 
-from app.infrastructure.llm.knowledge_extractor import (
+from app.infrastructure.llm.knowledge_extraction import (
     GeminiKnowledgeExtractor,
 )
 

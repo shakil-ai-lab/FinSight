@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.domain.documents import DocumentType
+from app.domain.fiscal import FiscalQuarter
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -30,8 +31,8 @@ class AnalysisRequest:
     analysis_type: AnalysisType
     fiscal_year: int
 
-    ticker: Optional[str] = None
-    fiscal_quarter: Optional[int] = None
+    ticker: str | None = None
+    fiscal_quarter: FiscalQuarter | None = None
     include_documents: list[DocumentType] = field(default_factory=list)
 
     created_at: datetime = field(default_factory=datetime.utcnow)

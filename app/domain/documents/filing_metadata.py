@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from app.domain.documents import DocumentType
+from app.domain.fiscal import FiscalQuarter
+
+from .document import DocumentType
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,5 +18,5 @@ class FilingMetadata:
     primary_document: str
     document_type: DocumentType
     fiscal_year: int
-    fiscal_quarter: int | None
+    fiscal_quarter: FiscalQuarter | None
     filing_date: date

@@ -5,6 +5,7 @@ from .knowledge_extractor import KnowledgeExtractor
 from .knowledge_analyzer import KnowledgeAnalyzer
 from .decision_support_engine import DecisionSupportEngine
 from .company_resolution_port import CompanyResolutionPort
+from .filing_discovery_port import FilingDiscoveryPort
 
 __all__ = [
     "FilingProvider",
@@ -14,4 +15,5 @@ __all__ = [
     "KnowledgeAnalyzer",
     "DecisionSupportEngine",
     "CompanyResolutionPort",
+    "FilingDiscoveryPort",
 ]

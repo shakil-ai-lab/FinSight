@@ -85,11 +85,13 @@ class PlanningService:
 
         for document_type in required_documents:
             document_requests.append(
-                DocumentRequest(
-                    document_type=document_type,
-                    fiscal_year=request.fiscal_year,
-                    fiscal_quarter=request.fiscal_quarter,
-                )
+                    DocumentRequest(
+                        document_type=document_type,
+                        fiscal_year=request.fiscal_year,
+                        fiscal_quarter=request.fiscal_quarter,
+                    )
             )
 
         return document_requests
+    
+    
