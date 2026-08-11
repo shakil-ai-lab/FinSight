@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from datetime import date
 
-from app.domain.documents.document import DocumentType
+from app.domain.fiscal.resolved_fiscal_period import ResolvedFiscalPeriod
+
+from app.domain.documents.document_type import DocumentType
 
 from .fiscal_quarter import FiscalQuarter
-from .resolved_fiscal_period import ResolvedFiscalPeriod
+
 
 
 class FiscalPeriodResolver:

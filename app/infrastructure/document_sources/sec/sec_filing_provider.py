@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-from datetime import date
-
+from app.application.ports.company_resolution_port import (
+    CompanyResolutionPort,
+)
+from app.application.ports.filing_discovery_port import (
+    FilingDiscoveryPort,
+)
 from app.application.ports.filing_provider import FilingProvider
 from app.domain.analysis import AnalysisPlan
 from app.domain.documents import (
     DocumentRequest,
     DocumentSource,
-    DocumentType,
-    FilingMetadata,
     SourceDocument,
 )
-
-from .sec_client import SECClient
+from app.infrastructure.document_sources.sec.sec_client import SECClient
 
 
 class SECFilingProvider(FilingProvider):
@@ -20,8 +21,15 @@ class SECFilingProvider(FilingProvider):
     Infrastructure implementation of the FilingProvider port.
     """
 
-    def __init__(self, client: SECClient) -> None:
+    def __init__(
+        self,
+        client: SECClient,
+        company_resolver: CompanyResolutionPort,
+        filing_discovery: FilingDiscoveryPort,
+    ) -> None:
         self._client = client
+        self._company_resolver = company_resolver
+        self._filing_discovery = filing_discovery
 
     def get_filing(
         self,
@@ -34,29 +42,21 @@ class SECFilingProvider(FilingProvider):
 
         request = plan.request
 
-        cik = self._get_company_cik(request.ticker)
-
-        filing = self._get_filing_metadata(
-            cik=cik,
-            document_request=document_request,
+        company = self._company_resolver.resolve(
+            request.ticker or request.company,
         )
 
-        # ===================== DEBUG =====================
-        # print("=" * 60)
-        # print(f"Company        : {request.company}")
-        # print(f"Ticker         : {request.ticker}")
-        # print(f"CIK            : {cik}")
-        # print(f"Document Type  : {document_request.document_type.value}")
-        # print(f"Fiscal Year    : {document_request.fiscal_year}")
-        # print(f"Fiscal Quarter : {document_request.fiscal_quarter}")
-        # print(f"Filing Date    : {filing.filing_date}")
-        # print(f"Accession No.  : {filing.accession_number}")
-        # print(f"Primary Doc    : {filing.primary_document}")
-        # print("=" * 60)
-        # ================================================
+        available_filings = self._filing_discovery.discover(
+            company,
+        )
+
+        filing = self._find_matching_filing(
+            available_filings,
+            document_request,
+        )
 
         url = self._build_filing_url(
-            cik=cik,
+            cik=int(company.cik),
             accession_number=filing.accession_number,
             primary_document=filing.primary_document,
         )
@@ -73,82 +73,35 @@ class SECFilingProvider(FilingProvider):
             content=content,
         )
 
-    def _get_company_cik(
-        self,
-        ticker: str | None,
-    ) -> int:
-        """
-        Resolve a stock ticker to its SEC CIK.
-        """
-
-        if not ticker:
-            raise ValueError("Ticker is required.")
-
-        companies = self._client.get_company_tickers()
-
-        ticker = ticker.upper()
-
-        for company in companies.values():
-            if company["ticker"].upper() == ticker:
-                return company["cik_str"]
-
-        raise ValueError(
-            f"Ticker '{ticker}' was not found."
-        )
-
-    def _get_filing_metadata(
-        self,
-        cik: int,
+    @staticmethod
+    def _find_matching_filing(
+        available_filings,
         document_request: DocumentRequest,
-    ) -> FilingMetadata:
+    ):
         """
-        Return metadata for the requested SEC filing.
+        Find the filing matching the requested document and fiscal period.
         """
 
-        submissions = self._client.get_company_submissions(cik)
-
-        recent = submissions["filings"]["recent"]
-
-        # print("=" * 100)
-        # for i in range(min(10, len(recent["form"]))):
-        #     print(
-        #         recent["form"][i],
-        #         recent["filingDate"][i],
-        #         recent["reportDate"][i],
-        #         recent["primaryDocument"][i],
-        #     )
-        # print("=" * 100)
-
-        forms = recent["form"]
-
-        if document_request.document_type is DocumentType.TEN_K:
-            target_form = "10-K"
-
-        elif document_request.document_type is DocumentType.TEN_Q:
-            target_form = "10-Q"
-
-        else:
-            raise ValueError(
-                f"Unsupported filing type: "
-                f"{document_request.document_type.value}"
-            )
-
-        for index, form in enumerate(forms):
-            if form == target_form:
-                return FilingMetadata(
-                    accession_number=recent["accessionNumber"][index],
-                    primary_document=recent["primaryDocument"][index],
-                    filing_date=date.fromisoformat(
-                        recent["filingDate"][index]
-                    ),
-                )
+        for filing in available_filings.filings:
+            if (
+                filing.document_type
+                is document_request.document_type
+                and filing.fiscal_year
+                == document_request.fiscal_year
+                and filing.fiscal_quarter
+                == document_request.fiscal_quarter
+            ):
+                return filing
 
         raise ValueError(
-            f"No {target_form} filing found."
+            "No matching filing found for "
+            f"{document_request.document_type.value}, "
+            f"fiscal year {document_request.fiscal_year}, "
+            f"fiscal quarter {document_request.fiscal_quarter}."
         )
 
+    @staticmethod
     def _build_filing_url(
-        self,
         cik: int,
         accession_number: str,
         primary_document: str,

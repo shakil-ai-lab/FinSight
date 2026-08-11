@@ -1,19 +1,13 @@
 from __future__ import annotations
 
+from app.domain.documents.document_type import DocumentType
+
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
 from typing import Optional
+from app.domain.fiscal.fiscal_quarter import FiscalQuarter
 
-
-class DocumentType(Enum):
-    """
-    Supported financial document types.
-    """
-
-    TEN_K = "10-K"
-    TEN_Q = "10-Q"
-    EARNINGS_TRANSCRIPT = "earnings_transcript"
 
 
 class DocumentSource(Enum):
@@ -56,7 +50,9 @@ class SourceDocument:
 
     fiscal_year: int
 
-    fiscal_quarter: Optional[int] = None
+    # fiscal_quarter: Optional[int] = None
+    
+    fiscal_quarter: FiscalQuarter | None = None
 
     filing_date: Optional[date] = None
 

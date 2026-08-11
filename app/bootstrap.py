@@ -65,6 +65,13 @@ from app.infrastructure.llm.presentation.simple_presentation_engine import (
     SimplePresentationEngine,
 )
 
+from app.infrastructure.document_sources.sec.sec_company_provider import (
+    SECCompanyProvider,
+)
+
+from app.infrastructure.document_sources.sec.sec_filing_discovery_service import (
+    SECFilingDiscoveryService,
+)
 
 def build_analysis_orchestrator() -> AnalysisOrchestrator:
     """
@@ -86,8 +93,18 @@ def build_analysis_orchestrator() -> AnalysisOrchestrator:
 
     sec_client = SECClient()
 
+    company_resolver = SECCompanyProvider(
+        client=sec_client,
+    )
+
+    filing_discovery = SECFilingDiscoveryService(
+        client=sec_client,
+    )
+
     filing_provider = SECFilingProvider(
         client=sec_client,
+        company_resolver=company_resolver,
+        filing_discovery=filing_discovery,
     )
 
     document_parser = SECDocumentParser()

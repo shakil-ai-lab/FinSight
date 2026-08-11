@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from datetime import datetime
 
+from app.domain.fiscal import FiscalQuarter
+
 import streamlit as st
 
 from app.domain.analysis import AnalysisRequest, AnalysisType
@@ -53,8 +55,9 @@ def render_sidebar() -> SidebarResult:
         if filing_type == "10-Q":
             fiscal_quarter = st.selectbox(
                 "Fiscal Quarter",
-                options=[1, 2, 3, 4],
+                options=list(FiscalQuarter),
                 index=0,
+                format_func=str,
             )
 
         st.divider()
