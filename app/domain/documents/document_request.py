@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from app.domain.fiscal import FiscalQuarter
 
-from .document import DocumentType
+from .document_type import DocumentType
 
 
 @dataclass(slots=True, frozen=True)

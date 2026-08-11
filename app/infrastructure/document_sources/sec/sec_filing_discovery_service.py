@@ -6,7 +6,7 @@ from app.application.ports.filing_discovery_port import FilingDiscoveryPort
 from app.domain.company.available_filings import AvailableFilings
 from app.domain.company.company import Company
 from app.domain.documents import DocumentType, FilingMetadata
-from app.domain.fiscal import FiscalPeriodResolver
+from app.domain.fiscal.fiscal_period_resolver import FiscalPeriodResolver
 
 from .sec_client import SECClient
 

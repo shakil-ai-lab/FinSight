@@ -1,10 +1,10 @@
 from datetime import date
 
-from app.domain.documents.document import DocumentType
+from app.domain.documents.document_type import DocumentType
 from app.domain.fiscal import (
-    FiscalPeriodResolver,
     FiscalQuarter,
 )
+from app.domain.fiscal.fiscal_period_resolver import FiscalPeriodResolver
 
 
 class TestFiscalPeriodResolver:
@@ -127,7 +127,7 @@ class TestFiscalPeriodResolver:
         )
 
         assert period.fiscal_year == 2026
-        
+
 
     def test_apple_q1_from_real_sec_filing(self):
         """

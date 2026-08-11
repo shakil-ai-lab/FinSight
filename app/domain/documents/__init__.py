@@ -1,8 +1,8 @@
 from .document import (
     DocumentSource,
-    DocumentType,
     SourceDocument,
 )
+from .document_type import DocumentType
 
 from .filing_metadata import FilingMetadata
 
