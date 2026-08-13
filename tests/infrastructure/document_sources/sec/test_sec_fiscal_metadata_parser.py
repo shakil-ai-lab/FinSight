@@ -88,7 +88,9 @@ class TestSECFilingDiscoveryService:
             DocumentType.TEN_K,
         ]
 
-    def test_discover_resolves_quarterly_fiscal_period(self):
+    def test_discover_resolves_quarterly_fiscal_period_from_sec_metadata(
+        self,
+    ):
         result = self.service.discover(self.company)
 
         filing = result.filings[0]
@@ -97,7 +99,9 @@ class TestSECFilingDiscoveryService:
         assert filing.fiscal_year == 2025
         assert filing.fiscal_quarter is FiscalQuarter.Q1
 
-    def test_discover_resolves_annual_fiscal_period(self):
+    def test_discover_resolves_annual_fiscal_period_from_sec_metadata(
+        self,
+    ):
         result = self.service.discover(self.company)
 
         filing = result.filings[1]
@@ -134,30 +138,25 @@ class TestSECFilingDiscoveryService:
             320193
         )
 
-    def test_discover_downloads_filing_documents(self):
+    def test_discover_downloads_supported_filing_documents(self):
         self.service.discover(self.company)
 
         assert self.client.download_document.call_count == 2
 
-    def test_discover_uses_fiscal_metadata_parser(self):
+    def test_discover_uses_sec_fiscal_metadata_parser(self):
         self.service.discover(self.company)
 
         assert self.fiscal_metadata_parser.parse.call_count == 2
 
-    def test_discover_passes_downloaded_content_to_parser(self):
-        self.service.discover(self.company)
-
-        calls = self.fiscal_metadata_parser.parse.call_args_list
-
-        assert calls[0].args == (
-            "<html>10-Q filing</html>",
+        self.fiscal_metadata_parser.parse.assert_any_call(
+            "<html>10-Q filing</html>"
         )
 
-        assert calls[1].args == (
-            "<html>10-K filing</html>",
+        self.fiscal_metadata_parser.parse.assert_any_call(
+            "<html>10-K filing</html>"
         )
 
-    def test_discover_builds_correct_filing_urls(self):
+    def test_discover_builds_correct_sec_filing_urls(self):
         self.service.discover(self.company)
 
         calls = self.client.download_document.call_args_list

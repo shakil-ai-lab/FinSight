@@ -6,7 +6,10 @@ from app.interfaces.streamlit.mappers.dashboard_mapper import (
     map_dashboard,
 )
 
-from app.bootstrap import build_analysis_orchestrator
+from app.bootstrap import (
+    build_analysis_orchestrator,
+    build_filing_discovery_service,
+)
 
 from app.interfaces.streamlit.components.analysis_tabs import (
     render_analysis_tabs,
@@ -51,12 +54,16 @@ def render_dashboard() -> None:
     # Sidebar
     # ------------------------------------------------------------
 
-    sidebar = render_sidebar()
+    filing_discovery_service = build_filing_discovery_service()
+
+    sidebar = render_sidebar(
+        filing_discovery_service=filing_discovery_service,
+    )
 
     if "brief" not in st.session_state:
         st.session_state.brief = None
 
-    if sidebar.analyze_clicked:
+    if sidebar.analyze_clicked and sidebar.analysis_request is not None:
         orchestrator = build_analysis_orchestrator()
         st.session_state.brief = orchestrator.analyze(
             sidebar.analysis_request

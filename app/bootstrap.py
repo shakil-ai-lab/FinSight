@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from app.infrastructure.document_sources.sec.sec_fiscal_metadata_parser import (
+    SECFiscalMetadataParser,
+)
+
 from app.infrastructure.transcripts.earnings_transcript_provider import (
     EarningsTranscriptProvider,
 )
@@ -38,6 +42,7 @@ from app.application.orchestrators import AnalysisOrchestrator
 from app.application.services import (
     DecisionSupportService,
     DocumentAcquisitionService,
+    FilingDiscoveryService,
     KnowledgeAnalysisService,
     KnowledgeExtractionService,
     PlanningService,
@@ -97,8 +102,16 @@ def build_analysis_orchestrator() -> AnalysisOrchestrator:
         client=sec_client,
     )
 
+    fiscal_metadata_parser = SECFiscalMetadataParser()
+
     filing_discovery = SECFilingDiscoveryService(
         client=sec_client,
+        fiscal_metadata_parser=fiscal_metadata_parser,
+    )
+
+    filing_discovery_service = FilingDiscoveryService(
+        company_resolver=company_resolver,
+        filing_discovery=filing_discovery,
     )
 
     filing_provider = SECFilingProvider(
@@ -218,4 +231,29 @@ def build_analysis_orchestrator() -> AnalysisOrchestrator:
         knowledge_analysis_service=knowledge_analysis_service,
         decision_support_service=decision_support_service,
         presentation_service=presentation_service,
+    )
+
+def build_filing_discovery_service() -> FilingDiscoveryService:
+    """
+    Build the filing discovery capability.
+
+    This is part of the application's Composition Root.
+    """
+
+    sec_client = SECClient()
+
+    company_resolver = SECCompanyProvider(
+        client=sec_client,
+    )
+
+    fiscal_metadata_parser = SECFiscalMetadataParser()
+
+    filing_discovery = SECFilingDiscoveryService(
+        client=sec_client,
+        fiscal_metadata_parser=fiscal_metadata_parser,
+    )
+
+    return FilingDiscoveryService(
+        company_resolver=company_resolver,
+        filing_discovery=filing_discovery,
     )

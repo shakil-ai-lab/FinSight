@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from datetime import datetime
-
-from app.domain.fiscal import FiscalQuarter
-
 import streamlit as st
 
+from app.application.services.filing_discovery_service import (
+    FilingDiscoveryService,
+)
 from app.domain.analysis import AnalysisRequest, AnalysisType
+from app.domain.company import AvailableFilings
+from app.domain.documents import FilingMetadata
+from app.domain.fiscal import FiscalQuarter
 
 
 @dataclass(slots=True, frozen=True)
@@ -17,11 +19,31 @@ class SidebarResult:
     Result returned by the Streamlit sidebar.
     """
 
-    analysis_request: AnalysisRequest
+    analysis_request: AnalysisRequest | None
     analyze_clicked: bool
 
 
-def render_sidebar() -> SidebarResult:
+def _format_filing(filing: FilingMetadata) -> str:
+    """
+    Format a filing for display in the Streamlit selector.
+    """
+
+    quarter = (
+        f" {filing.fiscal_quarter}"
+        if filing.fiscal_quarter is not None
+        else ""
+    )
+
+    return (
+        f"{filing.document_type.value} | "
+        f"FY{filing.fiscal_year}{quarter} | "
+        f"Filed {filing.filing_date}"
+    )
+
+
+def render_sidebar(
+    filing_discovery_service: FilingDiscoveryService,
+) -> SidebarResult:
     """
     Render the application sidebar and return the user's selections.
     """
@@ -33,32 +55,119 @@ def render_sidebar() -> SidebarResult:
             "Company Ticker",
             value="AAPL",
             help="Enter a valid SEC ticker symbol.",
-        ).upper()
+        ).strip().upper()
+
+        load_filings_clicked = st.button(
+            "Load SEC Filings",
+            use_container_width=True,
+        )
+
+        if load_filings_clicked:
+            if not company_ticker:
+                st.warning("Enter a company ticker first.")
+                st.session_state.available_filings = None
+            else:
+                try:
+                    st.session_state.available_filings = (
+                        filing_discovery_service.discover(
+                            company_ticker,
+                        )
+                    )
+                    st.session_state.selected_filing = None
+
+                except ValueError as exc:
+                    st.session_state.available_filings = None
+                    st.error(str(exc))
+
+        available_filings: AvailableFilings | None = (
+            st.session_state.get("available_filings")
+        )
+
+        if available_filings is None:
+            st.info("Load SEC filings to select a filing.")
+
+            return SidebarResult(
+                analysis_request=None,
+                analyze_clicked=False,
+            )
+
+        st.caption(
+            f"{available_filings.company.name} "
+            f"({available_filings.company.ticker})"
+        )
+
+        filings = available_filings.filings
+
+        document_types = list(
+            dict.fromkeys(
+                filing.document_type
+                for filing in filings
+            )
+        )
 
         filing_type = st.selectbox(
             "Filing Type",
-            options=["10-K", "10-Q"],
-            index=0,
+            options=document_types,
+            format_func=lambda value: value.value,
         )
-        current_year = datetime.now().year
 
-        fiscal_year = st.number_input(
+        type_filings = [
+            filing
+            for filing in filings
+            if filing.document_type is filing_type
+        ]
+
+        fiscal_years = sorted(
+            {
+                filing.fiscal_year
+                for filing in type_filings
+            },
+            reverse=True,
+        )
+
+        fiscal_year = st.selectbox(
             "Fiscal Year",
-            min_value=2000,
-            max_value=current_year,
-            value=current_year - 1,
-            step=1,
+            options=fiscal_years,
         )
 
-        fiscal_quarter = None
+        year_filings = [
+            filing
+            for filing in type_filings
+            if filing.fiscal_year == fiscal_year
+        ]
 
-        if filing_type == "10-Q":
+        fiscal_quarter: FiscalQuarter | None = None
+
+        quarter_options = list(
+            dict.fromkeys(
+                filing.fiscal_quarter
+                for filing in year_filings
+                if filing.fiscal_quarter is not None
+            )
+        )
+
+        if quarter_options:
             fiscal_quarter = st.selectbox(
                 "Fiscal Quarter",
-                options=list(FiscalQuarter),
-                index=0,
+                options=quarter_options,
                 format_func=str,
             )
+
+            selected_filings = [
+                filing
+                for filing in year_filings
+                if filing.fiscal_quarter == fiscal_quarter
+            ]
+        else:
+            selected_filings = year_filings
+
+        selected_filing = st.selectbox(
+            "Selected Filing",
+            options=selected_filings,
+            format_func=_format_filing,
+        )
+
+        st.session_state.selected_filing = selected_filing
 
         st.divider()
 
@@ -68,17 +177,19 @@ def render_sidebar() -> SidebarResult:
             use_container_width=True,
         )
 
+    analysis_type = (
+        AnalysisType.ANNUAL
+        if selected_filing.document_type.value == "10-K"
+        else AnalysisType.QUARTERLY
+    )
+
     analysis_request = AnalysisRequest(
-        company=company_ticker,
-        ticker=company_ticker,
-        analysis_type=(
-            AnalysisType.ANNUAL
-            if filing_type == "10-K"
-            else AnalysisType.QUARTERLY
-        ),
-        fiscal_year=int(fiscal_year),
-        fiscal_quarter=fiscal_quarter,
-)
+        company=available_filings.company.name,
+        ticker=available_filings.company.ticker,
+        analysis_type=analysis_type,
+        fiscal_year=selected_filing.fiscal_year,
+        fiscal_quarter=selected_filing.fiscal_quarter,
+    )
 
     return SidebarResult(
         analysis_request=analysis_request,

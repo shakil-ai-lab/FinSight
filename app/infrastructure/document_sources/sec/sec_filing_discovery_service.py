@@ -6,21 +6,27 @@ from app.application.ports.filing_discovery_port import FilingDiscoveryPort
 from app.domain.company.available_filings import AvailableFilings
 from app.domain.company.company import Company
 from app.domain.documents import DocumentType, FilingMetadata
-from app.domain.fiscal.fiscal_period_resolver import FiscalPeriodResolver
 
 from .sec_client import SECClient
+from .sec_fiscal_metadata_parser import SECFiscalMetadataParser
 
 
 class SECFilingDiscoveryService(FilingDiscoveryPort):
     """
     Discovers available SEC filings for a company.
+
+    Fiscal year and fiscal quarter are obtained from the
+    authoritative SEC filing XBRL metadata rather than inferred
+    from report dates.
     """
 
     def __init__(
         self,
         client: SECClient,
+        fiscal_metadata_parser: SECFiscalMetadataParser,
     ) -> None:
         self._client = client
+        self._fiscal_metadata_parser = fiscal_metadata_parser
 
     def discover(
         self,
@@ -34,16 +40,6 @@ class SECFilingDiscoveryService(FilingDiscoveryPort):
             int(company.cik)
         )
 
-        fiscal_year_end = submissions["fiscalYearEnd"]
-
-        fiscal_year_end_month = int(
-            fiscal_year_end[:2]
-        )
-
-        fiscal_year_end_day = int(
-            fiscal_year_end[2:]
-        )
-
         recent = submissions["filings"]["recent"]
 
         filings: list[FilingMetadata] = []
@@ -55,19 +51,20 @@ class SECFilingDiscoveryService(FilingDiscoveryPort):
             if document_type is None:
                 continue
 
-            report_date = self._parse_date(
-                recent["reportDate"][index]
-            )
-
             filing_date = self._parse_date(
                 recent["filingDate"][index]
             )
 
-            resolved_period = FiscalPeriodResolver.resolve(
-                report_date=report_date,
-                document_type=document_type,
-                fiscal_year_end_month=fiscal_year_end_month,
-                fiscal_year_end_day=fiscal_year_end_day,
+            url = self._build_filing_url(
+                cik=int(company.cik),
+                accession_number=recent["accessionNumber"][index],
+                primary_document=recent["primaryDocument"][index],
+            )
+
+            content = self._client.download_document(url)
+
+            fiscal_year, fiscal_quarter = (
+                self._fiscal_metadata_parser.parse(content)
             )
 
             filings.append(
@@ -75,10 +72,8 @@ class SECFilingDiscoveryService(FilingDiscoveryPort):
                     accession_number=recent["accessionNumber"][index],
                     primary_document=recent["primaryDocument"][index],
                     document_type=document_type,
-                    fiscal_year=resolved_period.fiscal_year,
-                    fiscal_quarter=(
-                        resolved_period.fiscal_quarter
-                    ),
+                    fiscal_year=fiscal_year,
+                    fiscal_quarter=fiscal_quarter,
                     filing_date=filing_date,
                 )
             )
@@ -105,3 +100,22 @@ class SECFilingDiscoveryService(FilingDiscoveryPort):
         value: str,
     ) -> date:
         return date.fromisoformat(value)
+
+    @staticmethod
+    def _build_filing_url(
+        cik: int,
+        accession_number: str,
+        primary_document: str,
+    ) -> str:
+        """
+        Build the SEC filing URL.
+        """
+
+        accession = accession_number.replace("-", "")
+
+        return (
+            "https://www.sec.gov/Archives/edgar/data/"
+            f"{cik}/"
+            f"{accession}/"
+            f"{primary_document}"
+        )
